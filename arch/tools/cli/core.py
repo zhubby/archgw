@@ -4,7 +4,8 @@ import time
 import sys
 import glob
 import docker
-from cli.utils import getLogger
+from docker.errors import DockerException
+from cli.utils import getLogger, update_docker_host_env
 from cli.consts import (
     ARCHGW_DOCKER_IMAGE,
     ARCHGW_DOCKER_NAME,
@@ -110,7 +111,12 @@ def start_arch(arch_config_file, env, log_timeout=120, foreground=False):
     log.info("Starting arch gateway")
 
     try:
-        client = docker.from_env()
+        try:
+            client = docker.from_env()
+        except DockerException as e:
+            # try setting up the docker host environment variable and retry
+            update_docker_host_env()
+            client = docker.from_env()
 
         try:
             container = client.containers.get("archgw")
