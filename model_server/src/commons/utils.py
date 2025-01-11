@@ -1,87 +1,50 @@
-import os
-import sys
-import time
+import torch
 import logging
-import requests
-import subprocess
-import importlib
+
+from datetime import datetime
 
 
-PROJ_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-
-# Default log directory and file
-DEFAULT_LOG_DIR = os.path.join(PROJ_DIR, ".logs")
-DEFAULT_LOG_FILE = "modelserver.log"
-
-
-def get_model_server_logger(log_dir=None, log_file=None):
+def get_model_server_logger():
     """
     Get or initialize the logger instance for the model server.
-
-    Parameters:
-    - log_dir (str): Custom directory to store the log file. Defaults to `./.logs`.
-    - log_file (str): Custom log file name. Defaults to `modelserver.log`.
 
     Returns:
     - logging.Logger: Configured logger instance.
     """
-    log_dir = log_dir or DEFAULT_LOG_DIR
-    log_file = log_file or DEFAULT_LOG_FILE
-    log_file_path = os.path.join(log_dir, log_file)
 
     # Check if the logger is already configured
-    logger = logging.getLogger("model_server_logger")
+    logger = logging.getLogger("model_server")
+
+    # Return existing logger instance if already configured
     if logger.hasHandlers():
-        # Return existing logger instance if already configured
         return logger
 
-    # Ensure the log directory exists, create it if necessary
-    try:
-        # Create directory if it doesn't exist
-        os.makedirs(log_dir, exist_ok=True)
-
-        # Check for write permissions
-        if not os.access(log_dir, os.W_OK):
-            raise PermissionError(f"No write permission for the directory: {log_dir}")
-    except (PermissionError, OSError) as e:
-        raise RuntimeError(f"Failed to initialize logger: {e}")
-
-    # Configure logging to file
+    # Configure logging to only log to console
     logging.basicConfig(
         level=logging.INFO,
-        format="%(asctime)s - %(levelname)s - %(message)s",
-        handlers=[
-            # logging.FileHandler(log_file_path, mode="w"),  # Overwrite logs in the file
-            logging.StreamHandler(),  # Also log to console
-        ],
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[logging.StreamHandler()],
     )
 
     return logger
 
 
-logger = get_model_server_logger()
-
-logging.info("initializing torch device ...")
-import torch
-
-
 def get_device():
-    available_device = {
-        "cpu": True,
-        "cuda": torch.cuda.is_available(),
-        "mps": (
-            torch.backends.mps.is_available()
-            if hasattr(torch.backends, "mps")
-            else False
-        ),
-    }
-
-    if available_device["cuda"]:
+    if torch.cuda.is_available():
         device = "cuda"
-    elif available_device["mps"]:
+    elif torch.backends.mps.is_available():
         device = "mps"
     else:
         device = "cpu"
 
     return device
+
+
+def get_today_date():
+    # Get today's date
+    today = datetime.now()
+
+    # Get full date with day of week
+    full_date = today.strftime("%Y-%m-%d")
+
+    return full_date

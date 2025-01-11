@@ -14,8 +14,8 @@ class Message(BaseModel):
 
 
 class ChatMessage(BaseModel):
-    messages: list[Message]
-    tools: List[Dict[str, Any]]
+    messages: List[Message] = []
+    tools: List[Dict[str, Any]] = []
 
 
 class Choice(BaseModel):
@@ -28,8 +28,8 @@ class ChatCompletionResponse(BaseModel):
     id: Optional[int] = 0
     object: Optional[str] = "chat_completion"
     created: Optional[str] = ""
-    choices: List[Choice]
-    model: str
+    choices: List[Choice] = []
+    model: str = ""
     metadata: Optional[Dict[str, str]] = {}
 
 
@@ -39,10 +39,11 @@ class GuardRequest(BaseModel):
 
 
 class GuardResponse(BaseModel):
-    prob: List
-    verdict: bool
-    sentence: List
-    latency: float = 0
+    task: str = ""
+    input: str = ""
+    prob: float = 0.0
+    verdict: bool = False
+    metadata: Optional[Dict[str, str]] = {}
 
 
 # ================================================================================================
@@ -121,6 +122,7 @@ class ArchBaseHandler:
         messages: List[Message],
         tools: List[Dict[str, Any]] = None,
         extra_instruction: str = None,
+        max_tokens=4096,
     ):
         """
         Processes a list of messages and formats them appropriately.
@@ -129,6 +131,7 @@ class ArchBaseHandler:
             messages (List[Message]): A list of message objects.
             tools (List[Dict[str, Any]], optional): A list of tools to include in the system prompt.
             extra_instruction (str, optional): Additional instructions to append to the last user message.
+            max_tokens (int): Maximum allowed token count, assuming ~4 characters per token on average.
 
         Returns:
             List[Dict[str, Any]]: A list of processed message dictionaries.
@@ -149,14 +152,12 @@ class ArchBaseHandler:
             )
 
             if tool_calls:
-                # [TODO] Extend to support multiple function calls
+                # TODO: Extend to support multiple function calls
                 role = "assistant"
                 content = f"<tool_call>\n{json.dumps(tool_calls[0]['function'])}\n</tool_call>"
-            elif message.role == "tool":
+            elif role == "tool":
                 role = "user"
-                content = (
-                    f"<tool_response>\n{json.dumps(message.content)}\n</tool_response>"
-                )
+                content = f"<tool_response>\n{json.dumps(content)}\n</tool_response>"
 
             processed_messages.append({"role": role, "content": content})
 
@@ -164,6 +165,23 @@ class ArchBaseHandler:
 
         if extra_instruction:
             processed_messages[-1]["content"] += extra_instruction
+
+        # keep the first system message and shift conversation if the total token length exceeds the limit
+        def truncate_messages(messages: List[Dict[str, Any]]):
+            num_tokens, conversation_idx = 0, 0
+            if messages[0]["role"] == "system":
+                num_tokens += len(messages[0]["content"]) // 4
+                conversation_idx = 1
+
+            for message_idx in range(len(messages) - 1, conversation_idx - 1, -1):
+                num_tokens += len(messages[message_idx]["content"]) // 4
+                if num_tokens >= max_tokens:
+                    if messages[message_idx]["role"] == "user":
+                        break
+
+            return messages[:conversation_idx] + messages[message_idx:]
+
+        processed_messages = truncate_messages(processed_messages)
 
         return processed_messages
 

@@ -8,7 +8,6 @@ from src.main import app
 client = TestClient(app)
 
 
-# [TODO] Review: check the following code. Seems something wrong with asyncio package❗
 # Unit tests for the health check endpoint
 @pytest.mark.asyncio
 async def test_healthz():
@@ -17,7 +16,6 @@ async def test_healthz():
     assert response.json() == {"status": "ok"}
 
 
-# [TODO] Review: check the following code. Seems something wrong with asyncio package❗
 # Unit test for the models endpoint
 @pytest.mark.asyncio
 async def test_models():
@@ -27,17 +25,14 @@ async def test_models():
     assert len(response.json()["data"]) > 0
 
 
-# [TODO] Review: check the following code. Seems something wrong with asyncio package❗
 # Unit test for the guardrail endpoint
 @pytest.mark.asyncio
 async def test_guardrail_endpoint():
     request_data = {"input": "Test for jailbreak and toxicity", "task": "jailbreak"}
     response = client.post("/guardrails", json=request_data)
     assert response.status_code == 200
-    assert "response" in response.json()
 
 
-# [TODO] Review: check the following code. Seems something wrong with asyncio package❗
 # Unit test for the function calling endpoint
 @pytest.mark.asyncio
 async def test_function_calling_endpoint():
@@ -50,4 +45,3 @@ async def test_function_calling_endpoint():
         }
         response = await client.post("/function_calling", json=request_data)
         assert response.status_code == 200
-        assert "result" in response.json()
