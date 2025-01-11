@@ -61,21 +61,6 @@ Key Features
     Parallel & Multiple	        Perform both parallel and multiple function calling
     =========================   ===============================================================
 
-
-Supported Languages
-~~~~~~~~~~~~~~~~~~~
-.. table::
-    :width: 100%
-
-    =========================   ===========================================================================================================================================
-    **Language**	            **Data Type**
-    =========================   ===========================================================================================================================================
-    Python	                    ``int``, ``str``, ``float``, ``bool``, ``list``, ``set``, ``dict``, ``tuple``
-    Java	                    ``byte``, ``short``, ``int``, ``long``, ``float``, ``double``, ``boolean``, ``char``, ``Array``, ``ArrayList``, ``Set``, ``HashMap``, ``Hashtable``, ``Queue``, ``Stack``
-    Javascript	                ``Number``, ``Bigint``, ``String``, ``Boolean``, ``Object``, ``Array``, ``Date``
-    =========================   ===========================================================================================================================================
-
-
 Implementing Function Calling
 -----------------------------
 
@@ -86,7 +71,6 @@ Step 1: Define the Function
 First, create or identify the backend function you want Arch to call. This could be an API endpoint, a script, or any other executable backend logic.
 
 .. code-block:: python
-    :caption: Example Function
 
     import requests
 
@@ -136,63 +120,21 @@ Specify the parameters your function needs and how Arch should interpret these.
 
 Step 3: Arch Takes Over
 ~~~~~~~~~~~~~~~~~~~~~~~
-Once you have defined the functions and configured the prompt targets, Arch takes care of the remaining work.
-It will automatically validate parameters validate parameters and ensure that the required parameters (e.g., location) are present in the prompt, and add validation rules if necessary.
-Here is ane example validation schema using the `jsonschema <https://json-schema.org/docs>`_ library
+Once you have defined the functions and configured the prompt targets, Arch Gateway takes care of the remaining work.
+It will automatically validate parameters, and ensure that the required parameters (e.g., location) are present in the prompt, and add validation rules if necessary.
 
-.. code-block:: python
-    :caption: Example Validation Schema
+.. figure:: /_static/img/arch_network_diagram_high_level.png
+   :width: 100%
+   :align: center
 
-    import requests
-    from jsonschema import validate, ValidationError
-
-    # Define the JSON Schema for parameter validation
-    weather_validation_schema = {
-        "type": "object",
-        "properties": {
-            "location": {
-                "type": "string",
-                "minLength": 1,
-                "description": "The city and state, e.g. 'San Francisco, New York'"
-            },
-            "unit": {
-                "type": "string",
-                "enum": ["celsius", "fahrenheit"],
-                "description": "The unit of temperature to return"
-            }
-        },
-        "required": ["location"],
-        "additionalProperties": False
-    }
-
-    def get_weather(location: str, unit: str = "fahrenheit"):
-        # Create the data object for validation
-        params = {
-            "location": location,
-            "unit": unit
-        }
-
-        # Validate parameters using JSON Schema
-        try:
-            validate(instance=params, schema=weather_validation_schema)
-        except ValidationError as e:
-            raise ValueError(f"Invalid input: {e.message}")
-
-        # Prepare the API request
-        api_server = "https://api.yourweatherapp.com"
-        endpoint = f"{api_server}/weather"
-
-        # Make the API request
-        response = requests.get(endpoint, params=params)
-        return response.json()
-
-    # Example usage
-    weather_info = get_weather("Seattle, WA", "celsius")
-    print(weather_info)
+   High-level network flow of where Arch Gateway sits in your agentic stack. Managing incoming and outgoing prompt traffic
 
 
-Once the functions are called, Arch formats the response and deliver back to users.
-By completing these setup steps, you enable Arch to manage the process from validation to response, ensuring users receive consistent, reliable results.
+Once a downstream function (API) is called, Arch Gateway takes the response and sends it an upstream LLM to complete the request (for summarization, Q/A, text generation tasks).
+For more details on how Arch Gateway enables you to centralize usage of LLMs, please read :ref:`LLM providers <llm_provider>`.
+
+By completing these steps, you enable Arch to manage the process from validation to response, ensuring users receive consistent, reliable results - and that you are focused
+on the stuff that matters most.
 
 Example Use Cases
 -----------------

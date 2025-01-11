@@ -8,9 +8,12 @@ Engineered with purpose-built large language models (LLMs), Arch handles all the
 detecting and rejecting jailbreak attempts, intelligently calling “backend” APIs to fulfill the user's request represented in a prompt, routing to and offering disaster recovery
 between upstream LLMs, and managing the observability of prompts and LLM interactions in a centralized way.
 
-.. image:: /_static/img/arch-logo.png
+.. figure:: /_static/img/arch_network_diagram_high_level.png
    :width: 100%
    :align: center
+
+   High-level network flow of where Arch Gateway sits in your agentic stack. Designed for both ingress and egress prompt traffic.
+
 
 **The project was born out of the belief that:**
 

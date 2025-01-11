@@ -13,9 +13,9 @@ from sphinxawesome_theme import ThemeOptions
 from sphinxawesome_theme.postprocess import Icons
 
 project = "Arch Docs"
-copyright = "2024, Katanemo Labs, Inc"
+copyright = "2025, Katanemo Labs, Inc"
 author = "Katanemo Labs, Inc"
-release = " v0.1.7"
+release = " v0.1.8"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

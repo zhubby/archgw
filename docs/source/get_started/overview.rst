@@ -7,6 +7,12 @@ Welcome to Arch, the intelligent prompt gateway designed to help developers buil
 In this documentation, you will learn how to quickly set up Arch to trigger API calls via prompts, apply prompt guardrails without writing any application-level logic,
 simplify the interaction with upstream LLMs, and improve observability all while simplifying your application development process.
 
+.. figure:: /_static/img/arch_network_diagram_high_level.png
+   :width: 100%
+   :align: center
+
+   High-level network flow of where Arch Gateway sits in your agentic stack. Designed for both ingress and egress prompt traffic.
+
 
 Get Started
 -----------
