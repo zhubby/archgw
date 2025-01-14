@@ -41,15 +41,16 @@
   },
   "extensions": {
     "recommendations": [
-      "ms-python.python",
-      "ms-python.debugpy",
-      "rust-lang.rust-analyzer",
-      "humao.rest-client",
-      "github.copilot",
       "eamodio.gitlens",
-      "ms-python.black-formatter",
-      "tamasfe.even-better-toml",
       "esbenp.prettier-vscode",
+      "github.copilot",
+      "github.vscode-pull-request-github",
+      "humao.rest-client",
+      "ms-python.black-formatter",
+      "ms-python.debugpy",
+      "ms-python.python",
+      "rust-lang.rust-analyzer",
+      "tamasfe.even-better-toml",
       ]
   }
 }
