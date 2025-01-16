@@ -263,6 +263,10 @@ impl StreamContext {
             );
         }
 
+        // update prompt target name from the tool call
+        callout_context.prompt_target_name =
+            Some(self.tool_calls.as_ref().unwrap()[0].function.name.clone());
+
         self.schedule_api_call_request(callout_context);
     }
 
@@ -359,8 +363,8 @@ impl StreamContext {
         let http_status = self
             .get_http_call_response_header(":status")
             .unwrap_or(StatusCode::OK.as_str().to_string());
-          debug!("api_call_response_handler: http_status: {}", http_status);
-          if http_status != StatusCode::OK.as_str() {
+        debug!("api_call_response_handler: http_status: {}", http_status);
+        if http_status != StatusCode::OK.as_str() {
             warn!(
                 "api server responded with non 2xx status code: {}",
                 http_status

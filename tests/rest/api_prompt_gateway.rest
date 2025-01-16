@@ -100,3 +100,17 @@ Content-Type: application/json
   ],
   "stream": true
 }
+
+### currency conversion test
+POST {{prompt_endpoint}}/v1/chat/completions HTTP/1.1
+Content-Type: application/json
+
+{
+  "model": "--",
+  "messages": [
+    {
+      "role": "user",
+      "content": "can you please convert 100 jpy"
+    }
+  ]
+}
