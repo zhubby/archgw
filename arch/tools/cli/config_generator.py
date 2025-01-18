@@ -16,18 +16,6 @@ ARCH_CONFIG_SCHEMA_FILE = os.getenv(
 )
 
 
-def add_secret_key_to_llm_providers(config_yaml):
-    llm_providers = []
-    for llm_provider in config_yaml.get("llm_providers", []):
-        access_key_env_var = llm_provider.get("access_key", False)
-        access_key_value = os.getenv(access_key_env_var, False)
-        if access_key_env_var and access_key_value:
-            llm_provider["access_key"] = access_key_value
-        llm_providers.append(llm_provider)
-    config_yaml["llm_providers"] = llm_providers
-    return config_yaml
-
-
 def validate_and_render_schema():
     env = Environment(loader=FileSystemLoader("./"))
     template = env.get_template("envoy.template.yaml")
@@ -70,18 +58,42 @@ def validate_and_render_schema():
                     f"Unknown endpoint {name}, please add it in endpoints section in your arch_config.yaml file"
                 )
 
-    arch_llm_providers = config_yaml["llm_providers"]
     arch_tracing = config_yaml.get("tracing", {})
+
+    llms_with_endpoint = []
+
+    updated_llm_providers = []
+    for llm_provider in config_yaml["llm_providers"]:
+        provider = None
+        if llm_provider.get("provider") and llm_provider.get("provider_interface"):
+            raise Exception(
+                "Please provide either provider or provider_interface, not both"
+            )
+        if llm_provider.get("provider"):
+            provider = llm_provider["provider"]
+            llm_provider["provider_interface"] = provider
+            del llm_provider["provider"]
+        updated_llm_providers.append(llm_provider)
+
+        if llm_provider.get("endpoint", None):
+            endpoint = llm_provider["endpoint"]
+            if len(endpoint.split(":")) > 1:
+                llm_provider["endpoint"] = endpoint.split(":")[0]
+                llm_provider["port"] = int(endpoint.split(":")[1])
+            llms_with_endpoint.append(llm_provider)
+
+    config_yaml["llm_providers"] = updated_llm_providers
+
     arch_config_string = yaml.dump(config_yaml)
-    config_yaml["mode"] = "llm"
     arch_llm_config_string = yaml.dump(config_yaml)
 
     data = {
         "arch_config": arch_config_string,
         "arch_llm_config": arch_llm_config_string,
         "arch_clusters": inferred_clusters,
-        "arch_llm_providers": arch_llm_providers,
+        "arch_llm_providers": config_yaml["llm_providers"],
         "arch_tracing": arch_tracing,
+        "local_llms": llms_with_endpoint,
     }
 
     rendered = template.render(data)

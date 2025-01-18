@@ -131,7 +131,7 @@ endpoints:
 
 llm_providers:
   - name: open-ai-gpt-4
-    provider: openai
+    provider_interface: openai
     access_key: secret_key
     model: gpt-4
     default: true

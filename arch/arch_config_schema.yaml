@@ -43,19 +43,27 @@ properties:
       properties:
         name:
           type: string
+        # this field is deprecated, use provider_interface instead
         provider:
           type: string
+          enum:
+            - openai
+        provider_interface:
+          type: string
+          enum:
+            - openai
+            - mistral
         access_key:
           type: string
         model:
           type: string
         default:
           type: boolean
+        endpoint:
+          type: string
       additionalProperties: false
       required:
         - name
-        - provider
-        - access_key
         - model
   overrides:
     type: object

@@ -190,7 +190,7 @@ llm_providers:
 
   - name: ministral-3b
     access_key: $MISTRAL_API_KEY
-    provider: mistral
+    provider: openai
     model: ministral-3b-latest
 ```
 

@@ -23,11 +23,15 @@ fn request_headers_expectations(module: &mut Tester, http_context: i32) {
             Some("x-arch-llm-provider-hint"),
         )
         .returning(Some("default"))
-        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(
+            Some(LogLevel::Debug),
+            Some("llm provider hint: Some(Default)"),
+        )
+        .expect_log(Some(LogLevel::Debug), Some("selected llm: open-ai-gpt-4"))
         .expect_add_header_map_value(
             Some(MapType::HttpRequestHeaders),
             Some("x-arch-llm-provider"),
-            Some("open-ai-gpt-4"),
+            Some("openai"),
         )
         .expect_replace_header_map_value(
             Some(MapType::HttpRequestHeaders),
@@ -46,8 +50,6 @@ fn request_headers_expectations(module: &mut Tester, http_context: i32) {
         .returning(None)
         .expect_get_header_map_value(Some(MapType::HttpRequestHeaders), Some(":path"))
         .returning(Some("/v1/chat/completions"))
-        .expect_get_header_map_pairs(Some(MapType::HttpRequestHeaders))
-        .returning(None)
         .expect_log(Some(LogLevel::Debug), None)
         .expect_get_header_map_value(Some(MapType::HttpRequestHeaders), Some("x-request-id"))
         .returning(None)
@@ -110,12 +112,12 @@ endpoints:
 
 llm_providers:
   - name: open-ai-gpt-4
-    provider: openai
+    provider_interface: openai
     access_key: secret_key
     model: gpt-4
     default: true
   - name: open-ai-gpt-4o
-    provider: openai
+    provider_interface: openai
     access_key: secret_key
     model: gpt-4o
 
