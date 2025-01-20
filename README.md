@@ -7,19 +7,18 @@
 [![e2e tests](https://github.com/katanemo/arch/actions/workflows/e2e_tests.yml/badge.svg)](https://github.com/katanemo/arch/actions/workflows/e2e_tests.yml)
 [![Build and Deploy Documentation](https://github.com/katanemo/arch/actions/workflows/static.yml/badge.svg)](https://github.com/katanemo/arch/actions/workflows/static.yml)
 
-## Build fast, observable, and personalized AI agents.
+## Fast, observable, and personalized agentic applciations.
 
-Arch is an intelligent [Layer 7](https://www.cloudflare.com/learning/ddos/what-is-layer-7/) gateway designed to protect, observe, and personalize AI agents with your APIs.
+Arch is an intelligent proxy server designed for prompts - to help you protect, observe, and build fully agentic experiences by simply writing APIs. Built on (and by the contributors of) [Envoy Proxy](https://www.envoyproxy.io/) with the belief that:
 
-Engineered with purpose-built LLMs, Arch handles the critical but undifferentiated tasks related to the handling and processing of prompts, including detecting and rejecting [jailbreak](https://github.com/verazuo/jailbreak_llms) attempts, intelligently calling "backend" APIs to fulfill the user's request represented in a prompt, routing to and offering disaster recovery between upstream LLMs, and managing the observability of prompts and LLM API calls in a centralized way.
+>Prompts are nuanced and opaque user requests, which require the same capabilities as traditional HTTP requests including secure handling, intelligent routing, robust observability, and integration with backend (API) systems for personalization – outside core business logic.*
 
- Arch is built on (and by the core contributors of) [Envoy Proxy](https://www.envoyproxy.io/) with the belief that:
+Arch is engineered with purpose-built LLMs to handle critical but undifferentiated tasks related to the handling and processing of prompts. This includes detecting and rejecting [jailbreak](https://github.com/verazuo/jailbreak_llms) attempts, intelligent task routing for improved accuracy, mapping user request into "backend" functions, and managing the observability of prompts and LLM API calls in a centralized way.
 
->Prompts are nuanced and opaque user requests, which require the same capabilities as traditional HTTP requests including secure handling, intelligent routing, robust observability, and integration with backend (API) systems for personalization – all outside business logic.*
 
 **Core Features**:
   - Built on [Envoy](https://envoyproxy.io): Arch runs alongside application servers as a separate containerized process, and builds on top of Envoy's proven HTTP management and scalability features to handle ingress and egress traffic related to prompts and LLMs.
-  - Intent Routing & Fast Function Calling. Engineered with purpose-built [LLMs](https://huggingface.co/collections/katanemo/arch-function-66f209a693ea8df14317ad68) to handle fast, cost-effective, and accurate prompt-based tasks like function/API calling, and parameter extraction from prompts to build smarter more accurate agentic applications.
+  - Task Routing & Fast Function Calling. Engineered with purpose-built [LLMs](https://huggingface.co/collections/katanemo/arch-function-66f209a693ea8df14317ad68) to handle fast, cost-effective, and accurate prompt-based tasks like function/API calling, and parameter extraction from prompts to build more task-accurate agentic applications.
   - Prompt [Guard](https://huggingface.co/collections/katanemo/arch-guard-6702bdc08b889e4bce8f446d): Arch centralizes guardrails to prevent jailbreak attempts and ensure safe user interactions without writing a single line of code.
   - Routing & Traffic Management: Arch centralizes calls to LLMs used by your applications, offering smart retries, automatic cutover, and resilient upstream connections for continuous availability.
   - Observability: Arch uses the W3C Trace Context standard to enable complete request tracing across applications, ensuring compatibility with observability tools, and provides metrics to monitor latency, token usage, and error rates, helping optimize AI application performance.
