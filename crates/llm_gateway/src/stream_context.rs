@@ -483,11 +483,14 @@ impl HttpContext for StreamContext {
             let tokens_str = chat_completions_chunk_response_events.to_string();
             //HACK: add support for tokenizing mistral and other models
             //filed issue https://github.com/katanemo/arch/issues/222
-            if model.as_ref().unwrap().starts_with("mistral")
-                || model.as_ref().unwrap().starts_with("ministral")
-            {
-                model = Some("gpt-4".to_string());
+            if !model.as_ref().unwrap().starts_with("gpt") {
+                warn!(
+                    "tiktoken_rs: unsupported model: {}, using gpt-4 to compute token count",
+                    model.as_ref().unwrap()
+                );
             }
+            model = Some("gpt-4".to_string());
+
             let token_count =
                 match tokenizer::token_count(model.as_ref().unwrap().as_str(), tokens_str.as_str())
                 {
