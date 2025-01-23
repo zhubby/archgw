@@ -1,4 +1,4 @@
-Arch is an **intelligent proxy server designed for prompts** - to help you protect, observe, and build agentic apps by simply integrating (existing) APIs. Focus on what matters most. 
+Focus on what matters most. Arch is an **intelligent proxy server designed for prompts** - to help you protect, observe, and build agentic apps by simply connecting (existing) APIs.
 
 Built by the contributors of [Envoy Proxy](https://www.envoyproxy.io/) with the belief that:
 
