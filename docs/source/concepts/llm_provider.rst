@@ -38,6 +38,7 @@ Adding custom LLM Provider
 We support any OpenAI compliant LLM for example mistral, openai, ollama etc. We offer first class support for openai and ollama. You can easily configure an LLM that communicates over the OpenAI API interface, by following the below guide.
 
 For example following code block shows you how to add an ollama-supported LLM in the `arch_config.yaml` file.
+
 .. code-block:: yaml
 
     - name: local-llama
