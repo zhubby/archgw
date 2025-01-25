@@ -60,7 +60,7 @@ Arch's CLI allows you to manage and interact with the Arch gateway efficiently. 
 ```console
 $ python -m venv venv
 $ source venv/bin/activate   # On Windows, use: venv\Scripts\activate
-$ pip install archgw==0.1.9
+$ pip install archgw==0.2.0
 ```
 
 ### Build AI Agent with Arch Gateway
