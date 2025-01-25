@@ -14,7 +14,7 @@ endpoints:
 llm_providers:
   - name: gpt-4o-mini
     access_key: $OPENAI_API_KEY
-    provider: openai
+    provider_interface: openai
     model: gpt-4o-mini
     default: true
 

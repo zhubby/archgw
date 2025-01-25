@@ -7,7 +7,7 @@ listener:
 # Centralized way to manage LLMs, manage keys, retry logic, failover and limits in a central way
 llm_providers:
   - name: OpenAI
-    provider: openai
+    provider_interface: openai
     access_key: $OPENAI_API_KEY
     model: gpt-3.5-turbo
     default: true

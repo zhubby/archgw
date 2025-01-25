@@ -9,7 +9,7 @@ listener:
 llm_providers:
   - name: gpt-4o
     access_key: $OPENAI_API_KEY
-    provider: openai
+    provider_interface: openai
     model: gpt-4o
 
 system_prompt: |

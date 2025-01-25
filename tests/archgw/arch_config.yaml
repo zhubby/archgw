@@ -14,18 +14,18 @@ endpoints:
 llm_providers:
   - name: gpt-4o-mini
     access_key: $OPENAI_API_KEY
-    provider: openai
+    provider_interface: openai
     model: gpt-4o-mini
     default: true
 
   - name: gpt-3.5-turbo-0125
     access_key: $OPENAI_API_KEY
-    provider: openai
+    provider_interface: openai
     model: gpt-3.5-turbo-0125
 
   - name: gpt-4o
     access_key: $OPENAI_API_KEY
-    provider: openai
+    provider_interface: openai
     model: gpt-4o
 
 system_prompt: |
