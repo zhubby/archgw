@@ -567,6 +567,18 @@ static_resources:
                       address: {{ local_llm_provider.endpoint }}
                       port_value: {{ local_llm_provider.port }}
                   hostname: {{ local_llm_provider.endpoint }}
+      {% if local_llm_provider.protocol == "https" %}
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          sni: {{ local_llm_provider.endpoint }}
+          common_tls_context:
+            tls_params:
+              tls_minimum_protocol_version: TLSv1_2
+              tls_maximum_protocol_version: TLSv1_3
+      {% endif %}
+
 {% endfor %}
     - name: arch_internal
       connect_timeout: 5s

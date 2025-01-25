@@ -32,6 +32,31 @@ calls, handling retries, managing rate limits, and ensuring seamless integration
 LLMs. Simply configure the details of the LLMs your application will use, and Arch offers a unified interface to
 make outbound LLM calls.
 
+Adding custom LLM Provider
+--------------------------
+
+We support any OpenAI compliant LLM for example mistral, openai, ollama etc. We offer first class support for openai and ollama. You can easily configure an LLM that communicates over the OpenAI API interface, by following the below guide.
+
+For example following code block shows you how to add an ollama-supported LLM in the `arch_config.yaml` file.
+.. code-block:: yaml
+
+    - name: local-llama
+      provider_interface: openai
+      model: llama3.2
+      endpoint: host.docker.internal:11434
+
+
+For example following code block shows you how to add mistral llm provider in the `arch_config.yaml` file.
+
+.. code-block:: yaml
+
+    - name: mistral-ai
+      provider_interface: openai
+      model: ministral-3b-latest
+      endpoint: api.mistral.ai:443
+      protocol: https
+
+
 Example: Using the OpenAI Python SDK
 ------------------------------------
 

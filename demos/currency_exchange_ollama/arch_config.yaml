@@ -7,6 +7,7 @@ listener:
   connect_timeout: 0.005s
 
 llm_providers:
+
   - name: local-llama
     provider_interface: openai
     model: llama3.2
