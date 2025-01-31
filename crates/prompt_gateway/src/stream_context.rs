@@ -14,7 +14,7 @@ use common::http::{CallArgs, Client};
 use common::stats::Gauge;
 use derivative::Derivative;
 use http::StatusCode;
-use log::{debug, warn};
+use log::{debug, trace, warn};
 use proxy_wasm::traits::*;
 use serde_yaml::Value;
 use std::cell::RefCell;
@@ -125,13 +125,14 @@ impl StreamContext {
         mut callout_context: StreamCallContext,
     ) {
         let body_str = String::from_utf8(body).unwrap();
-        debug!("archgw <= archfc response: {}", body_str);
+        debug!("model server response received");
+        trace!("response body: {}", body_str);
 
         let model_server_response: ModelServerResponse = match serde_json::from_str(&body_str) {
             Ok(arch_fc_response) => arch_fc_response,
             Err(e) => {
                 warn!(
-                    "error deserializing archfc response: {}, body: {}",
+                    "error deserializing modelserver response: {}, body: {}",
                     e, body_str
                 );
                 return self.send_server_error(ServerError::Deserialization(e), None);
@@ -141,7 +142,7 @@ impl StreamContext {
         let arch_fc_response = match model_server_response {
             ModelServerResponse::ChatCompletionsResponse(response) => response,
             ModelServerResponse::ModelServerErrorResponse(response) => {
-                debug!("archgw <= archfc error response: {}", response.result);
+                debug!("archgw <= modelserver error response: {}", response.result);
                 if response.result == "No intent matched" {
                     if let Some(default_prompt_target) = self
                         .prompt_targets
@@ -263,7 +264,7 @@ impl StreamContext {
             );
         }
 
-        // update prompt target name from the tool call
+        // update prompt target name from the tool call response
         callout_context.prompt_target_name =
             Some(self.tool_calls.as_ref().unwrap()[0].function.name.clone());
 
@@ -344,11 +345,10 @@ impl StreamContext {
         );
 
         debug!(
-            "archgw => api call, endpoint: {}{}, body: {}",
-            endpoint.name.as_str(),
-            path,
-            tool_params_json_str
+            "dispatching api call to developer endpoint: {}, path: {}",
+            endpoint.name, path
         );
+        trace!("request body: {}", tool_params_json_str);
 
         callout_context.upstream_cluster = Some(endpoint.name.to_owned());
         callout_context.upstream_cluster_path = Some(path.to_owned());
@@ -363,7 +363,10 @@ impl StreamContext {
         let http_status = self
             .get_http_call_response_header(":status")
             .unwrap_or(StatusCode::OK.as_str().to_string());
-        debug!("api_call_response_handler: http_status: {}", http_status);
+        debug!(
+            "developer api call response received: status code: {}",
+            http_status
+        );
         if http_status != StatusCode::OK.as_str() {
             warn!(
                 "api server responded with non 2xx status code: {}",
@@ -380,12 +383,12 @@ impl StreamContext {
             );
         }
         self.tool_call_response = Some(String::from_utf8(body).unwrap());
-        debug!(
-            "archgw <= api call response: {}",
+        trace!(
+            "response body: {}",
             self.tool_call_response.as_ref().unwrap()
         );
 
-        let mut messages = self.filter_out_arch_messages(&callout_context);
+        let mut messages = self.construct_llm_messages(&callout_context);
 
         let user_message = match messages.pop() {
             Some(user_message) => user_message,
@@ -431,7 +434,8 @@ impl StreamContext {
                 return self.send_server_error(ServerError::Serialization(e), None);
             }
         };
-        debug!("archgw => llm request: {}", llm_request_str);
+        debug!("sending request to upstream llm");
+        trace!("request body: {}", llm_request_str);
 
         self.start_upstream_llm_request_time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
@@ -442,25 +446,39 @@ impl StreamContext {
         self.resume_http_request();
     }
 
-    fn filter_out_arch_messages(&mut self, callout_context: &StreamCallContext) -> Vec<Message> {
-        let mut messages: Vec<Message> = Vec::new();
-        // add system prompt
+    fn get_system_prompt(&self, prompt_target: Option<PromptTarget>) -> Option<String> {
+        match prompt_target {
+            None => self.system_prompt.as_ref().clone(),
+            Some(prompt_target) => match prompt_target.system_prompt {
+                None => self.system_prompt.as_ref().clone(),
+                Some(system_prompt) => Some(system_prompt),
+            },
+        }
+    }
 
+    fn filter_out_arch_messages(&self, messages: &[Message]) -> Vec<Message> {
+        messages
+            .iter()
+            .filter(|m| {
+                !(m.role == TOOL_ROLE
+                    || m.content.is_none()
+                    || (m.tool_calls.is_some() && !m.tool_calls.as_ref().unwrap().is_empty()))
+            })
+            .cloned()
+            .collect()
+    }
+
+    fn construct_llm_messages(&mut self, callout_context: &StreamCallContext) -> Vec<Message> {
+        let mut messages: Vec<Message> = Vec::new();
+
+        // add system prompt
         let system_prompt = match callout_context.prompt_target_name.as_ref() {
             None => self.system_prompt.as_ref().clone(),
             Some(prompt_target_name) => {
-                let prompt_system_prompt = self
-                    .prompt_targets
-                    .get(prompt_target_name)
-                    .unwrap()
-                    .clone()
-                    .system_prompt;
-                match prompt_system_prompt {
-                    None => self.system_prompt.as_ref().clone(),
-                    Some(system_prompt) => Some(system_prompt),
-                }
+                self.get_system_prompt(self.prompt_targets.get(prompt_target_name).cloned())
             }
         };
+
         if system_prompt.is_some() {
             let system_prompt_message = Message {
                 role: SYSTEM_ROLE.to_string(),
@@ -472,18 +490,9 @@ impl StreamContext {
             messages.push(system_prompt_message);
         }
 
-        // don't send tools message and api response to chat gpt
-        for m in callout_context.request_body.messages.iter() {
-            // don't send api response and tool calls to upstream LLMs
-            if m.role == TOOL_ROLE
-                || m.content.is_none()
-                || (m.tool_calls.is_some() && !m.tool_calls.as_ref().unwrap().is_empty())
-            {
-                continue;
-            }
-            messages.push(m.clone());
-        }
-
+        messages.append(
+            &mut self.filter_out_arch_messages(callout_context.request_body.messages.as_ref()),
+        );
         messages
     }
 

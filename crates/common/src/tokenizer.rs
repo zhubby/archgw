@@ -1,4 +1,4 @@
-use log::debug;
+use log::trace;
 
 #[derive(thiserror::Error, Debug, PartialEq, Eq)]
 #[allow(dead_code)]
@@ -9,7 +9,7 @@ pub enum Error {
 
 #[allow(dead_code)]
 pub fn token_count(model_name: &str, text: &str) -> Result<usize, Error> {
-    debug!("getting token count model={}", model_name);
+    trace!("getting token count model={}", model_name);
     // Consideration: is it more expensive to instantiate the BPE object every time, or to contend the singleton?
     let bpe = tiktoken_rs::get_bpe_from_model(model_name).map_err(|_| Error::UnknownModel {
         model_name: model_name.to_string(),

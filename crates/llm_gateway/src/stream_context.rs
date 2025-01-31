@@ -10,7 +10,6 @@ use common::consts::{
 };
 use common::errors::ServerError;
 use common::llm_providers::LlmProviders;
-use common::pii::obfuscate_auth_header;
 use common::ratelimit::Header;
 use common::stats::{IncrementingMetric, RecordingMetric};
 use common::tracing::{Event, Span, TraceData, Traceparent};
@@ -82,12 +81,16 @@ impl StreamContext {
             .get_http_request_header(ARCH_PROVIDER_HINT_HEADER)
             .map(|llm_name| llm_name.into());
 
-        debug!("llm provider hint: {:?}", provider_hint);
         self.llm_provider = Some(routing::get_llm_provider(
             &self.llm_providers,
             provider_hint,
         ));
-        debug!("selected llm: {}", self.llm_provider.as_ref().unwrap().name);
+
+        debug!(
+            "request received: llm provider hint: {:?}, selected llm: {}",
+            self.get_http_request_header(ARCH_PROVIDER_HINT_HEADER),
+            self.llm_provider.as_ref().unwrap().name
+        );
     }
 
     fn modify_auth_headers(&mut self) -> Result<(), ServerError> {
@@ -150,7 +153,7 @@ impl StreamContext {
         self.metrics
             .input_sequence_length
             .record(token_count as u64);
-        log::debug!("Recorded input token count: {}", token_count);
+        trace!("Recorded input token count: {}", token_count);
 
         // Check if rate limiting needs to be applied.
         if let Some(selector) = self.ratelimit_selector.take() {
@@ -161,7 +164,7 @@ impl StreamContext {
                 NonZero::new(token_count as u32).unwrap(),
             )?;
         } else {
-            log::debug!("No rate limit applied for model: {}", model);
+            trace!("No rate limit applied for model: {}", model);
         }
 
         Ok(())
@@ -196,12 +199,6 @@ impl HttpContext for StreamContext {
 
         self.is_chat_completions_request =
             self.get_http_request_header(":path").unwrap_or_default() == CHAT_COMPLETIONS_PATH;
-
-        debug!(
-            "on_http_request_headers S[{}] req_headers={:?}",
-            self.context_id,
-            obfuscate_auth_header(&mut self.get_http_request_headers())
-        );
 
         self.request_id = self.get_http_request_header(REQUEST_ID_HEADER);
         self.traceparent = self.get_http_request_header(TRACE_PARENT_HEADER);
@@ -310,9 +307,10 @@ impl HttpContext for StreamContext {
     }
 
     fn on_http_response_headers(&mut self, _num_headers: usize, _end_of_stream: bool) -> Action {
-        debug!(
+        trace!(
             "on_http_response_headers [S={}] end_stream={}",
-            self.context_id, _end_of_stream
+            self.context_id,
+            _end_of_stream
         );
 
         self.set_property(
@@ -324,9 +322,11 @@ impl HttpContext for StreamContext {
     }
 
     fn on_http_response_body(&mut self, body_size: usize, end_of_stream: bool) -> Action {
-        debug!(
+        trace!(
             "on_http_response_body [S={}] bytes={} end_stream={}",
-            self.context_id, body_size, end_of_stream
+            self.context_id,
+            body_size,
+            end_of_stream
         );
 
         if !self.is_chat_completions_request {
@@ -342,7 +342,7 @@ impl HttpContext for StreamContext {
                 Ok(duration) => {
                     // Convert the duration to milliseconds
                     let duration_ms = duration.as_millis();
-                    debug!("Total latency: {} milliseconds", duration_ms);
+                    debug!("request latency: {}ms", duration_ms);
                     // Record the latency to the latency histogram
                     self.metrics.request_latency.record(duration_ms as u64);
 
@@ -350,11 +350,14 @@ impl HttpContext for StreamContext {
                         // Compute the time per output token
                         let tpot = duration_ms as u64 / self.response_tokens as u64;
 
-                        debug!("Time per output token: {} milliseconds", tpot);
                         // Record the time per output token
                         self.metrics.time_per_output_token.record(tpot);
 
-                        debug!("Tokens per second: {}", 1000 / tpot);
+                        trace!(
+                            "time per token: {}ms, tokens per second: {}",
+                            tpot,
+                            1000 / tpot
+                        );
                         // Record the tokens per second
                         self.metrics.tokens_per_second.record(1000 / tpot);
                     }
@@ -414,9 +417,10 @@ impl HttpContext for StreamContext {
         let body = if self.streaming_response {
             let chunk_start = 0;
             let chunk_size = body_size;
-            debug!(
+            trace!(
                 "streaming response reading, {}..{}",
-                chunk_start, chunk_size
+                chunk_start,
+                chunk_size
             );
             let streaming_chunk = match self.get_http_response_body(0, chunk_size) {
                 Some(chunk) => chunk,
@@ -438,7 +442,7 @@ impl HttpContext for StreamContext {
             }
             streaming_chunk
         } else {
-            debug!("non streaming response bytes read: 0:{}", body_size);
+            trace!("non streaming response bytes read: 0:{}", body_size);
             match self.get_http_response_body(0, body_size) {
                 Some(body) => body,
                 None => {
@@ -510,7 +514,7 @@ impl HttpContext for StreamContext {
                 match current_time.duration_since(self.start_time) {
                     Ok(duration) => {
                         let duration_ms = duration.as_millis();
-                        debug!("Time to First Token (TTFT): {} milliseconds", duration_ms);
+                        debug!("time to first token: {}ms", duration_ms);
                         self.ttft_duration = Some(duration);
                         self.metrics.time_to_first_token.record(duration_ms as u64);
                     }
@@ -520,12 +524,15 @@ impl HttpContext for StreamContext {
                 }
             }
         } else {
-            debug!("non streaming response");
+            trace!("non streaming response");
             let chat_completions_response: ChatCompletionsResponse =
                 match serde_json::from_str(body_utf8.as_str()) {
                     Ok(de) => de,
-                    Err(_e) => {
-                        debug!("invalid response: {}", body_utf8);
+                    Err(err) => {
+                        debug!(
+                            "non chat-completion compliant response received err: {}, body: {}",
+                            err, body_utf8
+                        );
                         return Action::Continue;
                     }
                 };
@@ -539,9 +546,11 @@ impl HttpContext for StreamContext {
             }
         }
 
-        debug!(
+        trace!(
             "recv [S={}] total_tokens={} end_stream={}",
-            self.context_id, self.response_tokens, end_of_stream
+            self.context_id,
+            self.response_tokens,
+            end_of_stream
         );
 
         Action::Continue

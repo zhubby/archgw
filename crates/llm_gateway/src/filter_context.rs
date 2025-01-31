@@ -9,7 +9,7 @@ use common::llm_providers::LlmProviders;
 use common::ratelimit;
 use common::stats::Gauge;
 use common::tracing::TraceData;
-use log::debug;
+use log::trace;
 use log::warn;
 use proxy_wasm::traits::*;
 use proxy_wasm::types::*;
@@ -79,7 +79,7 @@ impl RootContext for FilterContext {
     }
 
     fn create_http_context(&self, context_id: u32) -> Option<Box<dyn HttpContext>> {
-        debug!(
+        trace!(
             "||| create_http_context called with context_id: {:?} |||",
             context_id
         );
@@ -108,10 +108,8 @@ impl RootContext for FilterContext {
     fn on_tick(&mut self) {
         let _ = self.traces_queue.try_lock().map(|mut traces_queue| {
             while let Some(trace) = traces_queue.pop_front() {
-                debug!("trace received: {:?}", trace);
-
                 let trace_str = serde_json::to_string(&trace).unwrap();
-                debug!("trace: {}", trace_str);
+                trace!("trace details: {}", trace_str);
                 let call_args = CallArgs::new(
                     OTEL_COLLECTOR_HTTP,
                     OTEL_POST_PATH,
@@ -144,7 +142,7 @@ impl Context for FilterContext {
         _body_size: usize,
         _num_trailers: usize,
     ) {
-        debug!(
+        trace!(
             "||| on_http_call_response called with token_id: {:?} |||",
             token_id
         );
@@ -156,7 +154,7 @@ impl Context for FilterContext {
             .expect("invalid token_id");
 
         if let Some(status) = self.get_http_call_response_header(":status") {
-            debug!("trace response status: {:?}", status);
+            trace!("trace response status: {:?}", status);
         };
     }
 }

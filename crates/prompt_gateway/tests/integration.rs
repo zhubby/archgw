@@ -41,7 +41,7 @@ fn request_headers_expectations(module: &mut Tester, http_context: i32) {
 fn normal_flow(module: &mut Tester, filter_context: i32, http_context: i32) {
     module
         .call_proxy_on_context_create(http_context, filter_context)
-        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Trace), None)
         .execute_and_expect(ReturnType::None)
         .unwrap();
 
@@ -87,8 +87,9 @@ fn normal_flow(module: &mut Tester, filter_context: i32, http_context: i32) {
             None,
         )
         .returning(Some(1))
+        .expect_log(Some(LogLevel::Trace), None)
         .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Trace), None)
         .expect_log(Some(LogLevel::Trace), None)
         .expect_metric_increment("active_http_calls", 1)
         .execute_and_expect(ReturnType::Action(Action::Pause))
@@ -203,7 +204,7 @@ fn prompt_gateway_successful_request_to_open_ai_chat_completions() {
 
     module
         .call_proxy_on_context_create(http_context, filter_context)
-        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Trace), None)
         .execute_and_expect(ReturnType::None)
         .unwrap();
 
@@ -234,8 +235,9 @@ fn prompt_gateway_successful_request_to_open_ai_chat_completions() {
         .expect_get_buffer_bytes(Some(BufferType::HttpRequestBody))
         .returning(Some(chat_completions_request_body))
         .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Trace), None)
         .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Trace), None)
         .expect_log(Some(LogLevel::Trace), None)
         .expect_http_call(Some("arch_internal"), None, None, None, None)
         .returning(Some(4))
@@ -267,7 +269,7 @@ fn prompt_gateway_bad_request_to_open_ai_chat_completions() {
 
     module
         .call_proxy_on_context_create(http_context, filter_context)
-        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Trace), None)
         .execute_and_expect(ReturnType::None)
         .unwrap();
 
@@ -302,7 +304,7 @@ fn prompt_gateway_bad_request_to_open_ai_chat_completions() {
             None,
             None,
         )
-        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Trace), None)
         .execute_and_expect(ReturnType::Action(Action::Pause))
         .unwrap();
 }
@@ -369,10 +371,11 @@ fn prompt_gateway_request_to_llm_gateway() {
         .expect_metric_increment("active_http_calls", -1)
         .expect_get_buffer_bytes(Some(BufferType::HttpCallResponseBody))
         .returning(Some(&arch_fc_resp_str))
+        .expect_log(Some(LogLevel::Warn), None)
         .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Trace), None)
         .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Trace), None)
         .expect_log(Some(LogLevel::Trace), None)
         .expect_log(Some(LogLevel::Trace), None)
         .expect_http_call(
@@ -401,13 +404,12 @@ fn prompt_gateway_request_to_llm_gateway() {
         .expect_get_buffer_bytes(Some(BufferType::HttpCallResponseBody))
         .returning(Some(&body_text))
         .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Trace), None)
         .expect_get_header_map_value(Some(MapType::HttpCallResponseHeaders), Some(":status"))
         .returning(Some("200"))
-        .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Debug), None)
         .expect_set_buffer_bytes(Some(BufferType::HttpRequestBody), None)
         .execute_and_expect(ReturnType::None)
         .unwrap();

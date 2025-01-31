@@ -2,7 +2,6 @@ use std::rc::Rc;
 
 use crate::{configuration, llm_providers::LlmProviders};
 use configuration::LlmProvider;
-use log::debug;
 use rand::{seq::IteratorRandom, thread_rng};
 
 #[derive(Debug)]
@@ -35,11 +34,9 @@ pub fn get_llm_provider(
     }
 
     if llm_providers.default().is_some() {
-        debug!("no llm provider found for hint, using default llm provider");
         return llm_providers.default().unwrap();
     }
 
-    debug!("no default llm found, using random llm provider");
     let mut rng = thread_rng();
     llm_providers
         .iter()

@@ -85,10 +85,7 @@ impl HttpContext for StreamContext {
             }
         };
 
-        debug!(
-            "developer => archgw: {}",
-            String::from_utf8_lossy(&body_bytes)
-        );
+        trace!("request body: {}", String::from_utf8_lossy(&body_bytes));
 
         // Deserialize body into spec.
         // Currently OpenAI API.
@@ -159,7 +156,8 @@ impl HttpContext for StreamContext {
             }
         };
 
-        debug!("archgw => archfc: {}", json_data);
+        debug!("sending request to model server");
+        trace!("request body: {}", json_data);
 
         let mut headers = vec![
             (ARCH_UPSTREAM_HOST_HEADER, MODEL_SERVER_NAME),
