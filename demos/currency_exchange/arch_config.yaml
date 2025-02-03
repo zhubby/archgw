@@ -44,7 +44,7 @@ prompt_targets:
 
 endpoints:
   frankfurther_api:
-    endpoint: api.frankfurter.dev:443
+    endpoint: api.frankfurter.dev
     protocol: https
 
 tracing:

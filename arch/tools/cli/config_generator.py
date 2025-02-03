@@ -16,6 +16,20 @@ ARCH_CONFIG_SCHEMA_FILE = os.getenv(
 )
 
 
+def get_endpoint_and_port(endpoint, protocol):
+    endpoint_tokens = endpoint.split(":")
+    if len(endpoint_tokens) > 1:
+        endpoint = endpoint_tokens[0]
+        port = int(endpoint_tokens[1])
+        return endpoint, port
+    else:
+        if protocol == "http":
+            port = 80
+        else:
+            port = 443
+        return endpoint, port
+
+
 def validate_and_render_schema():
     env = Environment(loader=FileSystemLoader("./"))
     template = env.get_template("envoy.template.yaml")
@@ -42,9 +56,11 @@ def validate_and_render_schema():
     for name, endpoint_details in endpoints.items():
         inferred_clusters[name] = endpoint_details
         endpoint = inferred_clusters[name]["endpoint"]
-        if len(endpoint.split(":")) > 1:
-            inferred_clusters[name]["endpoint"] = endpoint.split(":")[0]
-            inferred_clusters[name]["port"] = int(endpoint.split(":")[1])
+        protocol = inferred_clusters[name].get("protocol", "http")
+        (
+            inferred_clusters[name]["endpoint"],
+            inferred_clusters[name]["port"],
+        ) = get_endpoint_and_port(endpoint, protocol)
 
     print("defined clusters from arch_config.yaml: ", json.dumps(inferred_clusters))
 
@@ -77,9 +93,10 @@ def validate_and_render_schema():
 
         if llm_provider.get("endpoint", None):
             endpoint = llm_provider["endpoint"]
-            if len(endpoint.split(":")) > 1:
-                llm_provider["endpoint"] = endpoint.split(":")[0]
-                llm_provider["port"] = int(endpoint.split(":")[1])
+            protocol = llm_provider.get("protocol", "http")
+            llm_provider["endpoint"], llm_provider["port"] = get_endpoint_and_port(
+                endpoint, protocol
+            )
             llms_with_endpoint.append(llm_provider)
 
     config_yaml["llm_providers"] = updated_llm_providers
