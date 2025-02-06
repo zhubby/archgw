@@ -365,6 +365,7 @@ fn prompt_gateway_request_to_llm_gateway() {
         metadata: None,
     };
 
+    let expected_body = "{\"city\":\"seattle\"}";
     let arch_fc_resp_str = serde_json::to_string(&arch_fc_resp).unwrap();
     module
         .call_proxy_on_http_call_response(http_context, 1, 0, arch_fc_resp_str.len() as i32, 0)
@@ -377,18 +378,17 @@ fn prompt_gateway_request_to_llm_gateway() {
         .expect_log(Some(LogLevel::Debug), None)
         .expect_log(Some(LogLevel::Trace), None)
         .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
         .expect_http_call(
             Some("arch_internal"),
             Some(vec![
-                ("x-arch-upstream", "api_server"),
                 (":method", "POST"),
-                (":path", "/weather"),
-                (":authority", "api_server"),
                 ("content-type", "application/json"),
+                ("x-arch-upstream", "api_server"),
+                (":authority", "api_server"),
                 ("x-envoy-max-retries", "3"),
+                (":path", "/weather"),
             ]),
-            None,
+            Some(expected_body),
             None,
             None,
         )
