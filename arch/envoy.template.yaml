@@ -486,14 +486,14 @@ static_resources:
         typed_config:
           "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
           sni: api.mistral.ai
-    {% for internal_clustrer in ["arch_fc", "model_server"] %}
-    - name: {{ internal_clustrer }}
+    {% for internal_cluster in ["arch_fc", "model_server"] %}
+    - name: {{ internal_cluster }}
       connect_timeout: 5s
       type: STRICT_DNS
       dns_lookup_family: V4_ONLY
       lb_policy: ROUND_ROBIN
       load_assignment:
-        cluster_name: {{ internal_clustrer }}
+        cluster_name: {{ internal_cluster }}
         endpoints:
           - lb_endpoints:
               - endpoint:
@@ -501,7 +501,7 @@ static_resources:
                     socket_address:
                       address: host.docker.internal
                       port_value: $MODEL_SERVER_PORT
-                  hostname: {{ internal_clustrer }}
+                  hostname: {{ internal_cluster }}
     {% endfor %}
     - name: mistral_7b_instruct
       connect_timeout: 5s

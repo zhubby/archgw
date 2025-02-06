@@ -135,6 +135,10 @@ properties:
               enum:
                 - GET
                 - POST
+            http_headers:
+              type: object
+              additionalProperties:
+                type: string
           additionalProperties: false
           required:
             - name

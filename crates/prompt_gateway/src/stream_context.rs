@@ -322,6 +322,12 @@ impl StreamContext {
             headers.insert(TRACE_PARENT_HEADER, self.traceparent.as_ref().unwrap());
         }
 
+        // override http headers that are set in the prompt target
+        let http_headers = endpoint_details.http_headers.clone().unwrap_or_default();
+        for (key, value) in http_headers.iter() {
+            headers.insert(key.as_str(), value.as_str());
+        }
+
         let call_args = CallArgs::new(
             ARCH_INTERNAL_CLUSTER_NAME,
             &path,

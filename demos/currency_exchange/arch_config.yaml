@@ -12,6 +12,11 @@ llm_providers:
     provider_interface: openai
     model: gpt-4o
 
+endpoints:
+  frankfurther_api:
+    endpoint: api.frankfurter.dev
+    protocol: https
+
 system_prompt: |
   You are a helpful assistant.
 
@@ -26,7 +31,7 @@ prompt_targets:
     description: Get currency exchange rate from USD to other currencies
     parameters:
       - name: currency_symbol
-        description: the currency that needs conversion
+        description: currency symbol to convert from USD
         required: true
         type: str
         in_path: true
@@ -41,11 +46,6 @@ prompt_targets:
     endpoint:
       name: frankfurther_api
       path: /v1/currencies
-
-endpoints:
-  frankfurther_api:
-    endpoint: api.frankfurter.dev
-    protocol: https
 
 tracing:
   random_sampling: 100

@@ -242,6 +242,7 @@ pub struct EndpointDetails {
     pub path: Option<String>,
     #[serde(rename = "http_method")]
     pub method: Option<HttpMethod>,
+    pub http_headers: Option<HashMap<String, String>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

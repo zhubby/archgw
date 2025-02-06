@@ -89,6 +89,18 @@ def get_llm_provider_access_keys(arch_config_file):
         if acess_key is not None:
             access_key_list.append(acess_key)
 
+    for prompt_target in arch_config_yaml.get("prompt_targets", []):
+        for k, v in prompt_target.get("endpoint", {}).get("http_headers", {}).items():
+            if k.lower() == "authorization":
+                print(
+                    f"found auth header: {k} for prompt_target: {prompt_target.get('name')}/{prompt_target.get('endpoint').get('name')}"
+                )
+                auth_tokens = v.split(" ")
+                if len(auth_tokens) > 1:
+                    access_key_list.append(auth_tokens[1])
+                else:
+                    access_key_list.append(v)
+
     return access_key_list
 
 
