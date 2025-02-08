@@ -137,9 +137,20 @@ impl HttpContext for StreamContext {
             .map(|(_, pt)| pt.into())
             .collect();
 
+        let mut metadata = deserialized_body.metadata.clone();
+
+        if let Some(overrides) = self.overrides.as_ref() {
+            if overrides.optimize_context_window.unwrap_or_default() {
+                if metadata.is_none() {
+                    metadata = Some(HashMap::new());
+                }
+                metadata.as_mut().unwrap().insert("optimize_context_window".to_string(), "true".to_string());
+            }
+        }
+
         let arch_fc_chat_completion_request = ChatCompletionsRequest {
             messages: deserialized_body.messages.clone(),
-            metadata: deserialized_body.metadata.clone(),
+            metadata,
             stream: deserialized_body.stream,
             model: "--".to_string(),
             stream_options: deserialized_body.stream_options.clone(),

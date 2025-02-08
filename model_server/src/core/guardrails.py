@@ -105,7 +105,7 @@ class ArchGuardHanlder:
             raise NotImplementedError(f"{req.task} is not supported!")
 
         logger.info("[Arch-Guard] - Prediction")
-        logger.info(f"[request]: {req.input}")
+        logger.info(f"[request arch-guard]: {req.input}")
 
         if len(req.input.split()) < max_num_words:
             result = self._predict_text(req.task, req.input)

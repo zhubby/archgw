@@ -16,6 +16,7 @@ class Message(BaseModel):
 class ChatMessage(BaseModel):
     messages: List[Message] = []
     tools: List[Dict[str, Any]] = []
+    metadata: Optional[Dict[str, str]] = {}
 
 
 class Choice(BaseModel):
@@ -123,6 +124,7 @@ class ArchBaseHandler:
         tools: List[Dict[str, Any]] = None,
         extra_instruction: str = None,
         max_tokens=4096,
+        metadata: Dict[str, str] = {},
     ):
         """
         Processes a list of messages and formats them appropriately.
@@ -157,7 +159,12 @@ class ArchBaseHandler:
                 content = f"<tool_call>\n{json.dumps(tool_calls[0]['function'])}\n</tool_call>"
             elif role == "tool":
                 role = "user"
-                content = f"<tool_response>\n{json.dumps(content)}\n</tool_response>"
+                if metadata.get("optimize_context_window", "false").lower() == "true":
+                    content = f"<tool_response>\n\n</tool_response>"
+                else:
+                    content = (
+                        f"<tool_response>\n{json.dumps(content)}\n</tool_response>"
+                    )
 
             processed_messages.append({"role": role, "content": content})
 

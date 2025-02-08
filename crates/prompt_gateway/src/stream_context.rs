@@ -46,7 +46,7 @@ pub struct StreamCallContext {
 pub struct StreamContext {
     system_prompt: Rc<Option<String>>,
     pub prompt_targets: Rc<HashMap<String, PromptTarget>>,
-    _overrides: Rc<Option<Overrides>>,
+    pub overrides: Rc<Option<Overrides>>,
     pub metrics: Rc<Metrics>,
     pub callouts: RefCell<HashMap<u32, StreamCallContext>>,
     pub context_id: u32,
@@ -89,7 +89,7 @@ impl StreamContext {
             streaming_response: false,
             user_prompt: None,
             is_chat_completions_request: false,
-            _overrides: overrides,
+            overrides: overrides,
             request_id: None,
             traceparent: None,
             _tracing: tracing,

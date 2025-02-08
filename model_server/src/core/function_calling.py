@@ -134,7 +134,7 @@ class ArchIntentHandler(ArchBaseHandler):
                 req.messages, req.tools, self.extra_instruction
             )
 
-            logger.info(f"[request]: {json.dumps(messages)}")
+            logger.info(f"[request to arch-fc (intent)]: {json.dumps(messages)}")
 
             model_response = self.client.chat.completions.create(
                 messages=messages,
@@ -519,9 +519,11 @@ class ArchFunctionHandler(ArchBaseHandler):
         """
         logger.info("[Arch-Function] - ChatCompletion")
 
-        messages = self._process_messages(req.messages, req.tools)
+        messages = self._process_messages(
+            req.messages, req.tools, metadata=req.metadata
+        )
 
-        logger.info(f"[request]: {json.dumps(messages)}")
+        logger.info(f"[request to arch-fc]: {json.dumps(messages)}")
 
         # always enable `stream=True` to collect model responses
         response = self.client.chat.completions.create(

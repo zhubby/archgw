@@ -25,6 +25,7 @@ pub struct Configuration {
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Overrides {
     pub prompt_target_intent_matching_threshold: Option<f64>,
+    pub optimize_context_window: Option<bool>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
