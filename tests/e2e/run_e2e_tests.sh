@@ -26,7 +26,7 @@ log starting > ../build.log
 
 log building and running function_callling demo
 log ===========================================
-cd ../../demos/weather_forecast/
+cd ../../demos/samples_python/weather_forecast/
 docker compose up weather_forecast_service --build -d
 cd -
 
@@ -53,7 +53,7 @@ cd ../../
 tail -F ~/archgw_logs/modelserver.log &
 model_server_tail_pid=$!
 archgw down
-archgw up demos/weather_forecast/arch_config.yaml
+archgw up demos/samples_python/weather_forecast/arch_config.yaml
 kill $model_server_tail_pid
 cd -
 
@@ -68,6 +68,6 @@ archgw down
 
 log shutting down the weather_forecast demo
 log =======================================
-cd ../../demos/weather_forecast
+cd ../../demos/samples_python/weather_forecast
 docker compose down
 cd -

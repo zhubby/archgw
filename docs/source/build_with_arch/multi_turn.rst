@@ -80,7 +80,7 @@ Once the prompt targets are configured as above, handle parameters across multi-
 Demo App
 ~~~~~~~~
 
-For your convenience, we've built a `demo app <https://github.com/katanemo/archgw/main/demos/multi_turn_rag_agent>`_
+For your convenience, we've built a `demo app <https://github.com/katanemo/archgw/tree/main/demos/samples_python/multi_turn_rag_agent>`_
 that you can test and modify locally for multi-turn RAG scenarios.
 
 .. figure:: includes/multi_turn/mutli-turn-example.png

@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  test:
+  e2e_tests:
     runs-on: ubuntu-latest
 
     steps:
