@@ -82,7 +82,7 @@ system_prompt: |
   Make sure your output is valid Markdown. And don't say "formatted in Markdown". Thanks!
 
 llm_providers:
-  - name: OpenAI
+  - name: openai
     provider_interface: openai
     access_key: $OPENAI_API_KEY
     model: gpt-4o
@@ -120,36 +120,3 @@ prompt_targets:
       path: /v1/artists/{artist_id}/top-tracks
       http_headers:
         Authorization: "Bearer $SPOTIFY_CLIENT_KEY"
-
-  # - name: search_for_item
-  #   description: Get information about albums, artists, playlists, tracks, shows, episodes or audiobooks. You can search for an item by its name, creator, or topic.
-  #   parameters:
-  #     - name: q
-  #       description: Your search query, which can include keywords related to the item name, its creator, or its topic.
-  #       required: true
-  #       type: str
-  #     - name: type
-  #       type: str
-  #       description: The type of the item to search for (e.g., album, artist, playlist, track, show, episode, audiobook).
-  #       enum:
-  #         - album
-  #         - artist
-  #         - playlist
-  #         - track
-  #         - show
-  #         - episode
-  #         - audiobook
-  #       required: true
-  #     - name: market
-  #       type: str
-  #       description: A country code
-  #       default: US
-  #     - name: limit
-  #       type: integer
-  #       description: The maximum number of results to return
-  #       default: "5"
-  #   endpoint:
-  #     name: spotify
-  #     path: /v1/search
-  #     http_headers:
-  #       Authorization: "Bearer $SPOTIFY_CLIENT_KEY"
