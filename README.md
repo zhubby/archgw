@@ -5,12 +5,12 @@
 
 _Arch is an intelligent (edge and LLM) proxy designed for agentic applications - to help you protect, observe, and build agentic tasks by simply connecting (existing) APIs._
 
-[Quickstart](##quickstart) •
-[Demos](##demos) •
-[Build agentic apps with Arch](###Build-AI-Agent-with-Arch-Gateway) •
-[Use Arch as an LLM router](###Use-Arch-Gateway-as-LLM-Router-) •
+[Quickstart](#Quickstart) •
+[Demos](#Demos) •
+[Build agentic apps with Arch](#Build-AI-Agent-with-Arch-Gateway) •
+[Use Arch as an LLM router](#Use-Arch-Gateway-as-LLM-Router) •
 [Documentation](https://docs.archgw.com) •
-[Contact](##contact)
+[Contact](#Contact)
 
 [![pre-commit](https://github.com/katanemo/arch/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/katanemo/arch/actions/workflows/pre-commit.yml)
 [![rust tests (prompt and llm gateway)](https://github.com/katanemo/arch/actions/workflows/rust_tests.yml/badge.svg)](https://github.com/katanemo/arch/actions/workflows/rust_tests.yml)
