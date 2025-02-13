@@ -1,5 +1,5 @@
 @model_server_endpoint = http://localhost:51000
-@archfc_endpoint = https://api.fc.archgw.com
+@archfc_endpoint = https://archfc.katanemo.dev
 
 ### multi turn conversation with intent, except parameter gathering
 
@@ -55,7 +55,7 @@ Content-Type: application/json
   ]
 }
 ### talk to Arch-Intent directly for completion
-POST https://api.fc.archgw.com/v1/chat/completions HTTP/1.1
+POST https://archfc.katanemo.dev/v1/chat/completions HTTP/1.1
 Content-Type: application/json
 
 {
@@ -126,7 +126,7 @@ Content-Type: application/json
   ]
 }
 ### talk to Arch-Intent directly for completion, expect No
-POST https://api.fc.archgw.com/v1/chat/completions HTTP/1.1
+POST https://archfc.katanemo.dev/v1/chat/completions HTTP/1.1
 Content-Type: application/json
 
 {

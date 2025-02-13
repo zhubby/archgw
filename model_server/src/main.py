@@ -4,7 +4,7 @@ import time
 import logging
 import src.commons.utils as utils
 
-from src.commons.globals import handler_map
+from src.commons.globals import ARCH_ENDPOINT, handler_map
 from src.core.utils.model_utils import (
     ChatMessage,
     ChatCompletionResponse,
@@ -50,6 +50,8 @@ logging.getLogger("opentelemetry.exporter.otlp.proto.grpc.exporter").setLevel(
 
 app = FastAPI()
 FastAPIInstrumentor().instrument_app(app)
+
+logger.info(f"using archfc endpoint: {ARCH_ENDPOINT}")
 
 
 @app.get("/healthz")
