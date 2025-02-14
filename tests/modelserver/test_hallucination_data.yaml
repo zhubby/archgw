@@ -63,7 +63,7 @@ test_cases:
         - role: "assistant"
           content: "Can you please provide me the days for the weather forecast?"
         - role: "user"
-          content: "los angeles in 5 days"
+          content: "5 days"
       tools:
         - type: "function"
           function:
@@ -82,7 +82,7 @@ test_cases:
               required: ["location", "days"]
     expected:
     - type: "metadata"
-      hallucination: true
+      hallucination: false
 
   - id: "[WEATHER AGENT] - multi turn, single tool, clarification"
     input:

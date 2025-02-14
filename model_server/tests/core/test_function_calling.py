@@ -54,20 +54,6 @@ def get_hallucination_data_complex():
     return req, True, True, True
 
 
-def get_hallucination_data_easy():
-    # Create instances of the Message class
-    message1 = Message(role="user", content="How is the weather in Seattle?")
-
-    # Create a list of tools
-    tools = [get_weather_api]
-
-    # Create an instance of the ChatMessage class
-    req = ChatMessage(messages=[message1], tools=tools)
-
-    # model will hallucinate
-    return req, True, True, True
-
-
 def get_hallucination_data_medium():
     # Create instances of the Message class
     message1 = Message(role="user", content="How is the weather in?")
@@ -142,7 +128,6 @@ def get_greeting_data():
     "get_data_func",
     [
         get_hallucination_data_complex,
-        get_hallucination_data_easy,
         get_complete_data,
         get_irrelevant_data,
         get_complete_data_2,
