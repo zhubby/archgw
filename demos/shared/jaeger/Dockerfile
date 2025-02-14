@@ -1,4 +1,4 @@
-FROM jaegertracing/all-in-one:1.62.0
+FROM jaegertracing/jaeger:2.3.0
 HEALTHCHECK \
     --interval=1s \
     --timeout=1s \
