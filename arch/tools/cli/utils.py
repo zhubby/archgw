@@ -1,10 +1,11 @@
+import glob
 import os
+import subprocess
+import sys
 import yaml
 import logging
-import docker
-from docker.errors import DockerException
 
-from cli.consts import ARCHGW_DOCKER_IMAGE, ARCHGW_DOCKER_NAME
+from cli.consts import ACCESS_LOG_FILES
 
 logging.basicConfig(
     level=logging.INFO,
@@ -19,63 +20,6 @@ def getLogger(name="cli"):
 
 
 log = getLogger(__name__)
-
-
-def update_docker_host_env():
-    """
-    Update DOCKER_HOST environment variable to use the local Docker socket
-    """
-    if os.getenv("DOCKER_HOST"):
-        return
-
-    default_docker_socket = os.getenv("DEFAULT_DOCKER_SOCKET", "/var/run/docker.sock")
-    if not os.path.exists(default_docker_socket):
-        home_dir = os.getenv("HOME")
-        docker_host = f"unix://{home_dir}/.docker/run/docker.sock"
-        log.info(
-            f"Default docker socket {default_docker_socket} not found, using {docker_host}"
-        )
-        os.environ["DOCKER_HOST"] = docker_host
-
-
-def validate_schema(arch_config_file: str) -> None:
-    try:
-        try:
-            client = docker.from_env()
-        except DockerException as e:
-            # try setting up the docker host environment variable and retry
-            update_docker_host_env()
-            client = docker.from_env()
-
-        container = client.containers.run(
-            image=ARCHGW_DOCKER_IMAGE,
-            volumes={
-                f"{arch_config_file}": {
-                    "bind": "/app/arch_config.yaml",
-                    "mode": "ro",
-                },
-            },
-            entrypoint=["python", "config_generator.py"],
-            detach=True,
-        )
-
-        # Wait for the container to finish and get the exit code
-        exit_code = container.wait()
-
-        # Check exit code for validation success
-        if exit_code["StatusCode"] != 0:
-            # Validation failed (non-zero exit code)
-            logs = container.logs().decode()  # Get container logs for debugging
-            raise ValueError(
-                f"Validation failed. Container exited with code {exit_code}.\nLogs:\n{logs}"
-            )
-
-        # Successful validation (exit code 0)
-        log.info("Schema validation successful!")
-
-    except docker.errors.APIError as e:
-        # Handle container creation error
-        raise ValueError(f"Failed to create container: {e}")
 
 
 def get_llm_provider_access_keys(arch_config_file):
@@ -127,3 +71,23 @@ def load_env_file_to_dict(file_path):
                 env_dict[key] = value
 
     return env_dict
+
+
+def stream_access_logs(follow):
+    """
+    Get the archgw access logs
+    """
+    log_file_pattern_expanded = os.path.expanduser(ACCESS_LOG_FILES)
+    log_files = glob.glob(log_file_pattern_expanded)
+
+    stream_command = ["tail"]
+    if follow:
+        stream_command.append("-f")
+
+    stream_command.extend(log_files)
+    subprocess.run(
+        stream_command,
+        check=True,
+        stdout=sys.stdout,
+        stderr=sys.stderr,
+    )

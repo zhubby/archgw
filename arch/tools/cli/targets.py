@@ -2,7 +2,6 @@ import ast
 import sys
 import yaml
 from typing import Any
-from pydantic import BaseModel
 
 FLASK_ROUTE_DECORATORS = ["route", "get", "post", "put", "delete", "patch"]
 FASTAPI_ROUTE_DECORATORS = ["get", "post", "put", "delete", "patch"]
