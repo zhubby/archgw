@@ -1,16 +1,16 @@
 version: v0.1
 
-listener:
-  address: 0.0.0.0 # or 127.0.0.1
-  port: 10000
-  # Defines how Arch should parse the content from application/json or text/pain Content-type in the http request
-  message_format: huggingface
-  common_tls_context: # If you configure port 443, you'll need to update the listener with your TLS certificates
-    tls_certificates:
-      - certificate_chain:
-          filename: /etc/certs/cert.pem
-        private_key:
-          filename: /etc/certs/key.pem
+listeners:
+  ingress_traffic:
+    address: 0.0.0.0
+    port: 10000
+    message_format: openai
+    timeout: 5s
+  egress_traffic:
+    address: 0.0.0.0
+    port: 12000
+    message_format: openai
+    timeout: 5s
 
 # Arch creates a round-robin load balancing between different endpoints, managed via the cluster subsystem.
 endpoints:
@@ -35,15 +35,6 @@ llm_providers:
     access_key: $OPENAI_API_KEY
     model: gpt-4o
     default: true
-    stream: true
-    rate_limits:
-      selector: #optional headers, to add rate limiting based on http headers like JWT tokens or API keys
-        http_header:
-          name: Authorization
-          value: "" # Empty value means each separate value has a separate limit
-      limit:
-        tokens: 100000 # Tokens per unit
-        unit: minute
 
   - name: Mistral8x7b
     provider_interface: openai
@@ -98,11 +89,6 @@ prompt_targets:
         description: Confirmation flag to proceed with reboot.
         default: false
         enum: [true, false]
-
-error_target:
-  endpoint:
-    name: error_target_1
-    path: /error
 
 tracing:
   # sampling rate. Note by default Arch works on OpenTelemetry compatible tracing.

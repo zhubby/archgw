@@ -1,10 +1,11 @@
 version: "0.1-beta"
 
-listener:
-  address: 0.0.0.0
-  port: 10000
-  message_format: huggingface
-  connect_timeout: 0.005s
+listeners:
+  egress_traffic:
+    address: 0.0.0.0
+    port: 12000
+    message_format: openai
+    timeout: 30s
 
 llm_providers:
   - name: gpt-4o-mini

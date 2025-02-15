@@ -2,6 +2,8 @@ import subprocess
 import os
 import time
 import sys
+
+import yaml
 from cli.utils import getLogger
 from cli.consts import (
     ARCHGW_DOCKER_NAME,
@@ -22,6 +24,29 @@ from cli.docker_cli import (
 log = getLogger(__name__)
 
 
+def _get_gateway_ports(arch_config_file: str) -> tuple:
+    PROMPT_GATEWAY_DEFAULT_PORT = 10000
+    LLM_GATEWAY_DEFAULT_PORT = 12000
+
+    # parse arch_config_file yaml file and get prompt_gateway_port
+    arch_config_dict = {}
+    with open(arch_config_file) as f:
+        arch_config_dict = yaml.safe_load(f)
+
+    prompt_gateway_port = (
+        arch_config_dict.get("listeners", {})
+        .get("ingress_traffic", {})
+        .get("port", PROMPT_GATEWAY_DEFAULT_PORT)
+    )
+    llm_gateway_port = (
+        arch_config_dict.get("listeners", {})
+        .get("egress_traffic", {})
+        .get("port", LLM_GATEWAY_DEFAULT_PORT)
+    )
+
+    return prompt_gateway_port, llm_gateway_port
+
+
 def start_arch(arch_config_file, env, log_timeout=120, foreground=False):
     """
     Start Docker Compose in detached mode and stream logs until services are healthy.
@@ -39,8 +64,14 @@ def start_arch(arch_config_file, env, log_timeout=120, foreground=False):
             docker_stop_container(ARCHGW_DOCKER_NAME)
             docker_remove_container(ARCHGW_DOCKER_NAME)
 
+        prompt_gateway_port, llm_gateway_port = _get_gateway_ports(arch_config_file)
+
         return_code, _, archgw_stderr = docker_start_archgw_detached(
-            arch_config_file, os.path.expanduser("~/archgw_logs"), env
+            arch_config_file,
+            os.path.expanduser("~/archgw_logs"),
+            env,
+            prompt_gateway_port,
+            llm_gateway_port,
         )
         if return_code != 0:
             log.info("Failed to start arch gateway: " + str(return_code))
@@ -50,7 +81,7 @@ def start_arch(arch_config_file, env, log_timeout=120, foreground=False):
         start_time = time.time()
         while True:
             health_check_status = health_check_endpoint(
-                "http://localhost:10000/healthz"
+                f"http://localhost:{prompt_gateway_port}/healthz"
             )
             archgw_status = docker_container_status(ARCHGW_DOCKER_NAME)
             current_time = time.time()

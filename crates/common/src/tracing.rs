@@ -166,7 +166,7 @@ impl TraceData {
                 attributes: vec![Attribute {
                     key: "service.name".to_string(),
                     value: AttributeValue {
-                        string_value: Some("upstream-llm".to_string()),
+                        string_value: Some("egress_llm_traffic".to_string()),
                     },
                 }],
             };

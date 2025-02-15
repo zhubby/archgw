@@ -3,21 +3,38 @@ type: object
 properties:
   version:
     type: string
-  listener:
+  listeners:
     type: object
-    properties:
-      address:
-        type: string
-      port:
-        type: integer
-      message_format:
-        type: string
-      connect_timeout:
-        type: string
     additionalProperties: false
-    required:
-      - address
-      - port
+    properties:
+      ingress_traffic:
+        type: object
+        properties:
+          address:
+            type: string
+          port:
+            type: integer
+          message_format:
+            type: string
+            enum:
+              - openai
+          timeout:
+            type: string
+        additionalProperties: false
+      egress_traffic:
+        type: object
+        properties:
+          address:
+            type: string
+          port:
+            type: integer
+          message_format:
+            type: string
+            enum:
+              - openai
+          timeout:
+            type: string
+        additionalProperties: false
   endpoints:
     type: object
     patternProperties:
@@ -107,7 +124,10 @@ properties:
               required:
                 type: boolean
               default:
-                type: string
+                anyOf:
+                  - type: string
+                  - type: integer
+                  - type: boolean
               description:
                 type: string
               type:
@@ -115,7 +135,10 @@ properties:
               enum:
                 type: array
                 items:
-                  type: string
+                  anyOf:
+                    - type: string
+                    - type: integer
+                    - type: boolean
               in_path:
                 type: boolean
               format:
@@ -224,5 +247,4 @@ properties:
 additionalProperties: false
 required:
   - version
-  - listener
   - llm_providers

@@ -42,11 +42,12 @@ Create ``arch_config.yaml`` file with the following content:
 
    version: v0.1
 
-   listener:
-     address: 0.0.0.0
-     port: 10000
-     message_format: huggingface
-     connect_timeout: 0.005s
+  listeners:
+    ingress_traffic:
+      address: 0.0.0.0
+      port: 10000
+      message_format: openai
+      timeout: 30s
 
    llm_providers:
      - name: gpt-4o
@@ -144,22 +145,23 @@ Create ``arch_config.yaml`` file with the following content:
 
    version: v0.1
 
-   listener:
-     address: 0.0.0.0
-     port: 10000
-     message_format: huggingface
-     connect_timeout: 0.005s
+  listeners:
+    egress_traffic:
+      address: 0.0.0.0
+      port: 12000
+      message_format: openai
+      timeout: 30s
 
    llm_providers:
      - name: gpt-4o
        access_key: $OPENAI_API_KEY
-       provider: openai
+       provider_interface: openai
        model: gpt-4o
        default: true
 
      - name: ministral-3b
        access_key: $MISTRAL_API_KEY
-       provider: mistral
+       provider_interface: openai
        model: ministral-3b-latest
 
 Step 2. Start arch gateway

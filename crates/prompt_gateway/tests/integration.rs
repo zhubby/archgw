@@ -81,10 +81,11 @@ fn normal_flow(module: &mut Tester, filter_context: i32, http_context: i32) {
                 (":path", "/function_calling"),
                 ("content-type", "application/json"),
                 (":authority", "model_server"),
+                ("x-envoy-upstream-rq-timeout-ms", "30000"),
             ]),
             None,
             None,
-            None,
+            Some(5000),
         )
         .returning(Some(1))
         .expect_log(Some(LogLevel::Trace), None)
@@ -387,10 +388,11 @@ fn prompt_gateway_request_to_llm_gateway() {
                 (":authority", "api_server"),
                 ("x-envoy-max-retries", "3"),
                 (":path", "/weather"),
+                ("x-envoy-upstream-rq-timeout-ms", "30000"),
             ]),
             Some(expected_body),
             None,
-            None,
+            Some(5000),
         )
         .returning(Some(2))
         .expect_metric_increment("active_http_calls", 1)

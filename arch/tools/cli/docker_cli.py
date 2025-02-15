@@ -1,7 +1,7 @@
 import subprocess
 import json
 import sys
-import requests  # Add this import
+import requests
 
 from cli.consts import ARCHGW_DOCKER_IMAGE, ARCHGW_DOCKER_NAME
 from cli.utils import getLogger
@@ -33,11 +33,19 @@ def docker_remove_container(container: str) -> str:
 
 
 def docker_start_archgw_detached(
-    arch_config_file: str, logs_path_abs: str, env: dict
+    arch_config_file: str,
+    logs_path_abs: str,
+    env: dict,
+    prompt_gateway_port,
+    llm_gateway_port,
 ) -> str:
     env_args = [item for key, value in env.items() for item in ["-e", f"{key}={value}"]]
 
-    port_mappings = ["10000:10000", "12000:12000", "9901:19901"]
+    port_mappings = [
+        f"{prompt_gateway_port}:{prompt_gateway_port}",
+        f"{llm_gateway_port}:{llm_gateway_port}",
+        "9901:19901",
+    ]
     port_mappings_args = [item for port in port_mappings for item in ("-p", port)]
 
     volume_mappings = [

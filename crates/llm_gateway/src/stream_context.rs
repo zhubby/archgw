@@ -381,7 +381,7 @@ impl HttpContext for StreamContext {
                     Ok(traceparent) => {
                         let mut trace_data = common::tracing::TraceData::new();
                         let mut llm_span = Span::new(
-                            "upstream_llm_time".to_string(),
+                            "egress_traffic".to_string(),
                             Some(traceparent.trace_id),
                             Some(traceparent.parent_id),
                             self.request_body_sent_time.unwrap(),

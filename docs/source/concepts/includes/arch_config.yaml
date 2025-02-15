@@ -1,10 +1,11 @@
 version: v0.1
 
-listener:
-  address: 0.0.0.0 # or 127.0.0.1
-  port: 10000
-  # Defines how Arch should parse the content from application/json or text/pain Content-type in the http request
-  message_format: huggingface
+listeners:
+  ingress_traffic:
+    address: 0.0.0.0
+    port: 10000
+    message_format: openai
+    timeout: 30s
 
 # Centralized way to manage LLMs, manage keys, retry logic, failover and limits in a central way
 llm_providers:
@@ -13,7 +14,6 @@ llm_providers:
     access_key: $OPENAI_API_KEY
     model: gpt-4o
     default: true
-    stream: true
 
 # default system prompt used by all prompt targets
 system_prompt: You are a network assistant that just offers facts; not advice on manufacturers or purchasing decisions.
@@ -51,11 +51,6 @@ prompt_targets:
         description: Confirmation flag to proceed with reboot.
         default: false
         enum: [true, false]
-
-error_target:
-  endpoint:
-    name: error_target_1
-    path: /error
 
 # Arch creates a round-robin load balancing between different endpoints, managed via the cluster subsystem.
 endpoints:
