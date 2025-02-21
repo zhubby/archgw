@@ -15,7 +15,9 @@ def docker_container_status(container: str) -> str:
     )
     if result.returncode != 0:
         return "not found"
-    return json.loads(result.stdout)[0]["State"]["Status"]
+
+    container_status = json.loads(result.stdout)[0]
+    return container_status.get("State", {}).get("Status", "")
 
 
 def docker_stop_container(container: str) -> str:
@@ -27,7 +29,7 @@ def docker_stop_container(container: str) -> str:
 
 def docker_remove_container(container: str) -> str:
     result = subprocess.run(
-        ["docker", "remove", container], capture_output=True, text=True, check=False
+        ["docker", "rm", container], capture_output=True, text=True, check=False
     )
     return result.returncode
 
@@ -90,9 +92,10 @@ def stream_gateway_logs(follow):
     """
     log.info("Logs from arch gateway service.")
 
-    options = ["docker", "logs", ARCHGW_DOCKER_NAME]
+    options = ["docker", "logs"]
     if follow:
         options.append("-f")
+    options.append(ARCHGW_DOCKER_NAME)
     try:
         # Run `docker-compose logs` to stream logs from the gateway service
         subprocess.run(

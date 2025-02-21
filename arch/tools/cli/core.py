@@ -121,7 +121,7 @@ def stop_arch():
             ["docker", "stop", ARCHGW_DOCKER_NAME],
         )
         subprocess.run(
-            ["docker", "remove", ARCHGW_DOCKER_NAME],
+            ["docker", "rm", ARCHGW_DOCKER_NAME],
         )
 
         log.info("Successfully shut down arch gateway service.")
