@@ -11,7 +11,10 @@ log = getLogger(__name__)
 
 def docker_container_status(container: str) -> str:
     result = subprocess.run(
-        ["docker", "inspect", container], capture_output=True, text=True, check=False
+        ["docker", "inspect", "--type=container", container],
+        capture_output=True,
+        text=True,
+        check=False,
     )
     if result.returncode != 0:
         return "not found"
