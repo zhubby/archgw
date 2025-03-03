@@ -80,9 +80,14 @@ def start_arch(arch_config_file, env, log_timeout=120, foreground=False):
 
         start_time = time.time()
         while True:
-            health_check_status = health_check_endpoint(
+            prompt_gateway_health_check_status = health_check_endpoint(
                 f"http://localhost:{prompt_gateway_port}/healthz"
             )
+
+            llm_gateway_health_check_status = health_check_endpoint(
+                f"http://localhost:{llm_gateway_port}/healthz"
+            )
+
             archgw_status = docker_container_status(ARCHGW_DOCKER_NAME)
             current_time = time.time()
             elapsed_time = current_time - start_time
@@ -92,7 +97,7 @@ def start_arch(arch_config_file, env, log_timeout=120, foreground=False):
                 log.info(f"stopping log monitoring after {log_timeout} seconds.")
                 break
 
-            if health_check_status:
+            if prompt_gateway_health_check_status or llm_gateway_health_check_status:
                 log.info("archgw is running and is healthy!")
                 break
             else:

@@ -135,7 +135,10 @@ impl From<String> for ParameterType {
             "array" => ParameterType::List,
             "dict" => ParameterType::Dict,
             "dictionary" => ParameterType::Dict,
-            _ => ParameterType::String,
+            _ => {
+                log::warn!("Unknown parameter type: {}, assuming type str", s);
+                ParameterType::String
+            },
         }
     }
 }

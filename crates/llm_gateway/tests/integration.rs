@@ -18,6 +18,8 @@ fn wasm_module() -> String {
 fn request_headers_expectations(module: &mut Tester, http_context: i32) {
     module
         .call_proxy_on_request_headers(http_context, 0, false)
+        .expect_get_header_map_value(Some(MapType::HttpRequestHeaders), Some(":path"))
+        .returning(Some("/v1/chat/completions"))
         .expect_get_header_map_value(
             Some(MapType::HttpRequestHeaders),
             Some("x-arch-llm-provider-hint"),
