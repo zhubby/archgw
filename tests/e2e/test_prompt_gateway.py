@@ -257,7 +257,6 @@ def test_prompt_gateway_param_tool_call(stream):
 
 
 @pytest.mark.parametrize("stream", [True, False])
-@pytest.mark.skip("no longer needed")
 def test_prompt_gateway_default_target(stream):
     body = {
         "messages": [

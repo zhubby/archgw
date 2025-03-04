@@ -171,7 +171,7 @@ class ArchBaseHandler:
         assert processed_messages[-1]["role"] == "user"
 
         if extra_instruction:
-            processed_messages[-1]["content"] += extra_instruction
+            processed_messages[-1]["content"] += "\n" + extra_instruction
 
         # keep the first system message and shift conversation if the total token length exceeds the limit
         def truncate_messages(messages: List[Dict[str, Any]]):

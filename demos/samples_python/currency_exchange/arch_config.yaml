@@ -19,7 +19,7 @@ endpoints:
     protocol: https
 
 system_prompt: |
-  You are a helpful assistant.
+  You are a helpful assistant. Only respond to queries related to currency exchange. If there are any other questions, I can't help you.
 
 prompt_guards:
   input_guards:

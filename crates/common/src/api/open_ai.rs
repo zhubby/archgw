@@ -138,7 +138,7 @@ impl From<String> for ParameterType {
             _ => {
                 log::warn!("Unknown parameter type: {}, assuming type str", s);
                 ParameterType::String
-            },
+            }
         }
     }
 }
@@ -205,13 +205,6 @@ pub struct ToolCallState {
 pub enum ArchState {
     ToolCall(Vec<ToolCallState>),
 }
-#[derive(Deserialize, Serialize)]
-#[serde(untagged)]
-pub enum ModelServerResponse {
-    ChatCompletionsResponse(ChatCompletionsResponse),
-    ModelServerErrorResponse(ModelServerErrorResponse),
-}
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ModelServerErrorResponse {
     pub result: String,
