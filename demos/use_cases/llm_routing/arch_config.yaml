@@ -33,8 +33,7 @@ llm_providers:
     access_key: $DEEPSEEK_API_KEY
     provider_interface: openai
     model: deepseek-reasoner
-    endpoint: api.deepseek.com
-    protocol: https
+    base_url: https://api.deepseek.com/
 
 tracing:
   random_sampling: 100

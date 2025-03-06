@@ -62,7 +62,7 @@ properties:
       properties:
         name:
           type: string
-        # this field is deprecated, use provider_interface instead
+        # provider field is deprecated, use provider_interface instead
         provider:
           type: string
           enum:
@@ -78,7 +78,10 @@ properties:
           type: string
         default:
           type: boolean
+        # endpoint field is deprecated, use base_url instead
         endpoint:
+          type: string
+        base_url:
           type: string
         protocol:
           type: string

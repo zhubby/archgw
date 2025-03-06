@@ -3,6 +3,7 @@ import os
 from jinja2 import Environment, FileSystemLoader
 import yaml
 from jsonschema import validate
+from urllib.parse import urlparse
 
 ENVOY_CONFIG_TEMPLATE_FILE = os.getenv(
     "ENVOY_CONFIG_TEMPLATE_FILE", "envoy.template.yaml"
@@ -91,12 +92,39 @@ def validate_and_render_schema():
             del llm_provider["provider"]
         updated_llm_providers.append(llm_provider)
 
+        if llm_provider.get("endpoint") and llm_provider.get("base_url"):
+            raise Exception("Please provide either endpoint or base_url, not both")
+
         if llm_provider.get("endpoint", None):
             endpoint = llm_provider["endpoint"]
             protocol = llm_provider.get("protocol", "http")
             llm_provider["endpoint"], llm_provider["port"] = get_endpoint_and_port(
                 endpoint, protocol
             )
+            llms_with_endpoint.append(llm_provider)
+        elif llm_provider.get("base_url", None):
+            base_url = llm_provider["base_url"]
+            urlparse_result = urlparse(base_url)
+            if llm_provider.get("port"):
+                raise Exception("Please provider port in base_url")
+            if urlparse_result.scheme == "" or urlparse_result.scheme not in [
+                "http",
+                "https",
+            ]:
+                raise Exception(
+                    "Please provide a valid URL with scheme (http/https) in base_url"
+                )
+            protocol = urlparse_result.scheme
+            port = urlparse_result.port
+            if port is None:
+                if protocol == "http":
+                    port = 80
+                else:
+                    port = 443
+            endpoint = urlparse_result.hostname
+            llm_provider["endpoint"] = endpoint
+            llm_provider["port"] = port
+            llm_provider["protocol"] = protocol
             llms_with_endpoint.append(llm_provider)
 
     config_yaml["llm_providers"] = updated_llm_providers
