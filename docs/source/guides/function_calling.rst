@@ -118,6 +118,9 @@ Specify the parameters your function needs and how Arch should interpret these.
           name: api_server
           path: /weather
 
+.. Note::
+    For a complete refernce of attributes that you can configure in a prompt target, see :ref:`here <defining_prompt_target_parameters>`.
+
 Step 3: Arch Takes Over
 ~~~~~~~~~~~~~~~~~~~~~~~
 Once you have defined the functions and configured the prompt targets, Arch Gateway takes care of the remaining work.

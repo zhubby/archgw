@@ -53,29 +53,28 @@ A prompt target configuration includes the following elements:
 - ``endpoint``: The API endpoint or function that handles the prompt.
 - ``parameters`` (Optional): A list of parameters to extract from the prompt.
 
+.. _defining_prompt_target_parameters:
+
 Defining Parameters
 ~~~~~~~~~~~~~~~~~~~
 Parameters are the pieces of information that Arch needs to extract from the user's prompt to perform the desired action.
-Each parameter can be marked as required or optional.
-Here is a full list of parameter attributes that Arch can support:
+Each parameter can be marked as required or optional. Here is a full list of parameter attributes that Arch can support:
 
 .. table::
     :width: 100%
 
-    ====================      ============================================================================
+    ========================  ============================================================================
     **Attribute**             **Description**
-    ====================      ============================================================================
-    ``name``                  Specifies identifier of parameters
-    ``type``                  Specifies the data type of the parameter.
-    ``description``           Provides a human-readable explanation of the parameter's purpose.
-    ``required``              Indicates whether the parameter is mandatory or optional
+    ========================  ============================================================================
+    ``name (req.)``           Specifies name of the parameter.
+    ``description (req.)``    Provides a human-readable explanation of the parameter's purpose.
+    ``type (req.)``           Specifies the data type. Supported types include: **int**, **str**, **float**, **bool**, **list**, **set**, **dict**, **tuple**
     ``default``               Specifies a default value for the parameter if not provided by the user.
-    ``items``                 Used in the context of arrays to define the schema of items within an array.
-    ``format``                Specifies a format for the parameter value, e.g., date and email
-    ``enum``                  Lists the allowable values for the parameter.
-    ``minimum``               Defines the minimum acceptable value for numeric parameters.
-    ``maximum``               Specifies the maximum acceptable value for numeric parameters.
-    ====================      ============================================================================
+    ``format``                Specifies a format for the parameter value. For example: `2019-12-31` for a date value.
+    ``enum``                  Lists of allowable values for the parameter with data type matching the ``type`` attribute. **Usage Example**: ``enum: ["celsius`", "fahrenheit"]``
+    ``items``                 Specifies the attribute of the elements when type euqals **list**, **set**, **dict**, **tuple**. **Usage Example**: ``items: {"type": "str"}``
+    ``required``              Indicates whether the parameter is mandatory or optional. Valid values: **true** or **false**
+    ========================  ============================================================================
 
 Example Configuration
 ~~~~~~~~~~~~~~~~~~~~~
