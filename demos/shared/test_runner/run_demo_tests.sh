@@ -8,11 +8,13 @@ do
   echo "Running tests for $demo ..."
   echo "****************************************"
   cd ../../samples_python/$demo
+  echo "starting archgw"
   archgw up arch_config.yaml
-  docker compose up -d
-  cd ../../shared/test_runner
-  TEST_DATA=../../samples_python/$demo/test_data.yaml poetry run pytest
-  cd ../../samples_python/$demo
+  echo "starting docker containers"
+  docker compose up -d 2>&1 > /dev/null
+  echo "starting hurl tests"
+  hurl --test hurl_tests/*.hurl
+  echo "stopping docker containers and archgw"
   archgw down
   docker compose down -v
   cd ../../shared/test_runner
