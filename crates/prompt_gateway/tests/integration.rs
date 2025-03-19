@@ -352,10 +352,10 @@ fn prompt_gateway_request_to_llm_gateway() {
                     tool_type: ToolType::Function,
                     function: FunctionCallDetail {
                         name: String::from("weather_forecast"),
-                        arguments: HashMap::from([(
+                        arguments: Some(HashMap::from([(
                             String::from("city"),
                             Value::String(String::from("seattle")),
-                        )]),
+                        )])),
                     },
                 }]),
                 model: None,
@@ -381,8 +381,8 @@ fn prompt_gateway_request_to_llm_gateway() {
         .expect_log(Some(LogLevel::Debug), None)
         .expect_log(Some(LogLevel::Trace), None)
         .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Trace), None)
         .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Trace), None)
         .expect_http_call(
             Some("arch_internal"),
             Some(vec![
@@ -400,6 +400,7 @@ fn prompt_gateway_request_to_llm_gateway() {
         )
         .returning(Some(2))
         .expect_metric_increment("active_http_calls", 1)
+        .expect_log(Some(LogLevel::Trace), None)
         .execute_and_expect(ReturnType::None)
         .unwrap();
 
@@ -499,10 +500,10 @@ fn prompt_gateway_request_no_intent_match() {
                     tool_type: ToolType::Function,
                     function: FunctionCallDetail {
                         name: String::from("weather_forecast"),
-                        arguments: HashMap::from([(
+                        arguments: Some(HashMap::from([(
                             String::from("city"),
                             Value::String(String::from("seattle")),
-                        )]),
+                        )])),
                     },
                 }]),
                 model: None,
@@ -655,10 +656,10 @@ fn prompt_gateway_request_no_intent_match_default_target() {
                     tool_type: ToolType::Function,
                     function: FunctionCallDetail {
                         name: String::from("weather_forecast"),
-                        arguments: HashMap::from([(
+                        arguments: Some(HashMap::from([(
                             String::from("city"),
                             Value::String(String::from("seattle")),
-                        )]),
+                        )])),
                     },
                 }]),
                 model: None,

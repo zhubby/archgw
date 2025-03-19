@@ -22,6 +22,11 @@ fn request_headers_expectations(module: &mut Tester, http_context: i32) {
         .returning(Some("/v1/chat/completions"))
         .expect_get_header_map_value(
             Some(MapType::HttpRequestHeaders),
+            Some("x-arch-llm-provider"),
+        )
+        .returning(None)
+        .expect_get_header_map_value(
+            Some(MapType::HttpRequestHeaders),
             Some("x-arch-llm-provider-hint"),
         )
         .returning(None)
@@ -36,6 +41,7 @@ fn request_headers_expectations(module: &mut Tester, http_context: i32) {
             Some("Authorization"),
             Some("Bearer secret_key"),
         )
+        .expect_remove_header_map_value(Some(MapType::HttpRequestHeaders), Some("content-length"))
         .expect_get_header_map_value(
             Some(MapType::HttpRequestHeaders),
             Some("x-arch-llm-provider-hint"),
@@ -48,8 +54,6 @@ fn request_headers_expectations(module: &mut Tester, http_context: i32) {
         .returning(Some("selector-key"))
         .expect_get_header_map_value(Some(MapType::HttpRequestHeaders), Some("selector-key"))
         .returning(Some("selector-value"))
-        .expect_get_header_map_pairs(Some(MapType::HttpRequestHeaders))
-        .returning(None)
         .expect_get_header_map_value(Some(MapType::HttpRequestHeaders), Some(":path"))
         .returning(Some("/v1/chat/completions"))
         .expect_get_header_map_value(Some(MapType::HttpRequestHeaders), Some("x-request-id"))
@@ -223,8 +227,8 @@ fn llm_gateway_successful_request_to_open_ai_chat_completions() {
         .returning(Some(chat_completions_request_body))
         .expect_log(Some(LogLevel::Trace), None)
         .expect_log(Some(LogLevel::Trace), None)
-        .expect_metric_record("input_sequence_length", 21)
         .expect_log(Some(LogLevel::Trace), None)
+        .expect_metric_record("input_sequence_length", 21)
         .expect_log(Some(LogLevel::Debug), None)
         .expect_log(Some(LogLevel::Debug), None)
         .expect_set_buffer_bytes(Some(BufferType::HttpRequestBody), None)
@@ -266,7 +270,7 @@ fn llm_gateway_bad_request_to_open_ai_chat_completions() {
     {\
         \"messages\": [\
         {\
-            \"role\": \"system\",\
+            \"role\": \"system\"\
         },\
         {\
             \"role\": \"user\",\
@@ -283,14 +287,19 @@ fn llm_gateway_bad_request_to_open_ai_chat_completions() {
         )
         .expect_get_buffer_bytes(Some(BufferType::HttpRequestBody))
         .returning(Some(incomplete_chat_completions_request_body))
-        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Trace), None)
         .expect_send_local_response(
             Some(StatusCode::BAD_REQUEST.as_u16().into()),
             None,
             None,
             None,
         )
-        .execute_and_expect(ReturnType::Action(Action::Pause))
+        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Trace), None)
+        .expect_metric_record("input_sequence_length", 14)
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Debug), None)
+        .execute_and_expect(ReturnType::Action(Action::Continue))
         .unwrap();
 }
 
