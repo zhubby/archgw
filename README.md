@@ -25,10 +25,10 @@ Move faster by letting Arch handle the **pesky** heavy lifting in building agetn
 # Overview
 <a href="https://www.producthunt.com/posts/arch-3?embed=true&utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-arch&#0045;3" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=565761&theme=dark&period=daily&t=1742359429995" alt="Arch - Build&#0032;fast&#0044;&#0032;hyper&#0045;personalized&#0032;agents&#0032;with&#0032;intelligent&#0032;infra | Product Hunt" style="width: 188px; height: 41px;" width="188" height="41" /></a>
 
-Past the thrill of a quick AI demo, have you ever found yourself hitting these walls 🧱? You know, the all-too-familiar ones:
+Past the thrill of a quick AI demo, have you ever found yourself hitting these walls? You know, the all-too-familiar ones:
 
-- You go from one BIG prompt to specialized prompts, but get stuck building **routing and handoff+** code?
-- You want multiple LLMs, but struggle to **quickly and safely add new models** without integration code?
+- You go from one BIG prompt to specialized prompts, but get stuck building **routing and handoff** code?
+- You want use new LLMs, but struggle to **quickly and safely add LLMs** without writing integration code?
 - You're bogged down with prompt engineering just to **clarify user intent and validate inputs** effectively?
 - You're wasting cycles choosing and integrating code for **observability** instead of it happening transparently?
 
