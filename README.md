@@ -25,26 +25,25 @@ Move faster by letting Arch handle the **pesky** heavy lifting in building agent
 # Overview
 <a href="https://www.producthunt.com/posts/arch-3?embed=true&utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-arch&#0045;3" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=565761&theme=dark&period=daily&t=1742359429995" alt="Arch - Build&#0032;fast&#0044;&#0032;hyper&#0045;personalized&#0032;agents&#0032;with&#0032;intelligent&#0032;infra | Product Hunt" style="width: 188px; height: 41px;" width="188" height="41" /></a>
 
-Past the thrill of a quick AI demo, have you ever found yourself hitting these walls? You know, the all-too-familiar ones:
+Past the thrill of an AI demo, have you found yourself hitting these walls? You know, the all too familiar ones:
 
 - You go from one BIG prompt to specialized prompts, but get stuck building **routing and handoff** code?
 - You want use new LLMs, but struggle to **quickly and safely add LLMs** without writing integration code?
 - You're bogged down with prompt engineering just to **clarify user intent and validate inputs** effectively?
 - You're wasting cycles choosing and integrating code for **observability** instead of it happening transparently?
 
-And you think to youself, can't I move faster and just focus on higher-level objectives in a language and framework agnostic way? Yes, you can!
-**Arch Gateway** was built by the contributors of [Envoy Proxy](https://www.envoyproxy.io/) with the belief that:
+And you think to youself, can't I move faster by focusing on higher-level objectives in a language/framework agnostic way? Well, you can! **Arch Gateway** was built by the contributors of [Envoy Proxy](https://www.envoyproxy.io/) with the belief that:
 
 >Prompts are nuanced and opaque user requests, which require the same capabilities as traditional HTTP requests including secure handling, intelligent routing, robust observability, and integration with backend (API) systems to improve speed and accuracy for common agentic scenarios  – all outside core application logic.*
 
 **Core Features**:
 
-  - **Agent Routing**. Engineered with purpose-built [LLMs](https://huggingface.co/collections/katanemo/arch-function-66f209a693ea8df14317ad68) for blazng fast (<100ms) routing and hand-off decisions to downstream agents.
-  - **Blazing Fast ⚡ Function Calling**: For common agentic scenarios, expose tools as APIs and let Arch detect, clarify and convert prompts to structured APIs
-  - **Prompt [Guardrails](https://huggingface.co/collections/katanemo/arch-guard-6702bdc08b889e4bce8f446d)**: Centralizes guardrails to prevent jailbreak attempts and  harmful outcomes, and ensure safe user interactions without writing a single line of code.
-  - **Unified Access to (any) LLM**: Arch centralizes calls to LLMs used by your applications, offering smart retries, automatic cutover, and resilient upstream connections for continuous availability.
-  - **Rich Observability**: Arch uses the W3C Trace Context standard to enable complete request tracing across applications, ensuring compatibility with observability tools, and provides metrics to monitor latency, token usage, and error rates, helping optimize AI application performance.
-  - **Built on [Envoy](https://envoyproxy.io)**: Arch runs alongside application servers as a separate containerized process, and builds on top of Envoy's proven HTTP management and scalability features to handle ingress and egress traffic related to prompts and LLMs.
+  - `🚦 Routing`. Engineered with purpose-built [LLMs](https://huggingface.co/collections/katanemo/arch-function-66f209a693ea8df14317ad68) for fast (<100ms) agent routing and hand-off scenarios
+  - `⚡ Tools Use`: For common agentic scenarios let Arch instantly clarfiy and convert prompts to tools/API calls
+  - `⛨ Guardrails`: Centrally configure and prevent harmful outcomes and ensure safe user interactions
+  - `🔗 Access to LLMs`: Centralize access and traffic to LLMs with smart retries for continuous availability
+  - `🕵 Observability`: W3C compatible request tracing and LLM metrics that instantly plugin with popular tools
+  - `🧱 Built on Envoy`: Arch runs alongside app servers as a containerized process, and builds on top of [Envoy's](https://envoyproxy.io) proven HTTP management and scalability features to handle ingress and egress traffic related to prompts and LLMs.
 
 **High-Level Sequence Diagram**:
 ![alt text](docs/source/_static/img/arch_network_diagram_high_level.png)
