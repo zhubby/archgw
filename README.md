@@ -5,7 +5,7 @@
 
 
 _The intelligent (edge and LLM) proxy server for agentic applications._<br><br>
-Move faster by letting Arch handle the **pesky** heavy lifting in building agetns: fast input clarification, agent routing, seamless integration of prompts with tools for common tasks, and unified access and observability of LLMs.
+Move faster by letting Arch handle the **pesky** heavy lifting in building agents: fast input clarification, agent routing, seamless integration of prompts with tools for common tasks, and unified access and observability of LLMs.
 
 [Quickstart](#Quickstart) •
 [Demos](#Demos) •
