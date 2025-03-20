@@ -3,7 +3,11 @@
 
 Overview
 ============
-Welcome to Arch, the intelligent prompt gateway designed to help developers build **fast**, **secure**, and **personalized** generative AI apps at ANY scale.
+Welcome to Arch, The intelligent (edge and LLM) proxy server for agentic applications.
+
+Move **faster** by letting Arch handle the pesky heavy lifting in building agents: **fast input clarification**, **agent routing**,
+seamless integration of prompts with **tools for common tasks**, and **unified access and observability of LLMs**.
+
 In this documentation, you will learn how to quickly set up Arch to trigger API calls via prompts, apply prompt guardrails without writing any application-level logic,
 simplify the interaction with upstream LLMs, and improve observability all while simplifying your application development process.
 

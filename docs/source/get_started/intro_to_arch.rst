@@ -3,10 +3,17 @@
 Intro to Arch
 =============
 
-Arch is an intelligent `(Layer 7) <https://www.cloudflare.com/learning/ddos/what-is-layer-7/>`_ gateway designed for generative AI apps, agents, copilots that work with prompts.
-Engineered with purpose-built large language models (LLMs), Arch handles all the critical but undifferentiated tasks related to the handling and processing of prompts, including
-detecting and rejecting jailbreak attempts, intelligently calling “backend” APIs to fulfill the user's request represented in a prompt, routing to and offering disaster recovery
-between upstream LLMs, and managing the observability of prompts and LLM interactions in a centralized way.
+Arch is an intelligent proxy server designed agentic applications. **Move faster** by letting Arch handle the **pesky heavy lifting** in building agents:
+fast input clarification, agent routing, seamless integration of prompts with tools for common tasks, and unified access and observability of LLMs.
+
+Past the thrill of an AI demo, have you found yourself hitting these walls? You know, the all too familiar ones:
+
+- You break a prompt into specialized ones, but **get stuck writing routing** and handoff logic?
+- You want use new LLMs, but **struggle to quickly add LLMs** without writing integration logic?
+- You're **trapped in tedious prompting work** to clarify inputs and user intents?
+- You're **wasting cycles** choosing and integrating **code for observability** instead of it just happening transparently?
+
+And you think to youself, can't I move faster by focusing on higher-level objectives in a language and framework agnostic way? Well, you can!
 
 .. figure:: /_static/img/arch_network_diagram_high_level.png
    :width: 100%
@@ -15,7 +22,7 @@ between upstream LLMs, and managing the observability of prompts and LLM interac
    High-level network flow of where Arch Gateway sits in your agentic stack. Designed for both ingress and egress prompt traffic.
 
 
-**The project was born out of the belief that:**
+**Arch Gateway was built by the contributors of Envoy Proxy with the belief that:**
 
   *Prompts are nuanced and opaque user requests, which require the same capabilities as traditional HTTP requests
   including secure handling, intelligent routing, robust observability, and integration with backend (API)
