@@ -38,7 +38,7 @@ def chat(
     try:
         response = client.chat.completions.create(
             # we select model from arch_config file
-            model="--",
+            model="None",
             messages=history,
             temperature=1.0,
             stream=True,

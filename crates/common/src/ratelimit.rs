@@ -1,7 +1,7 @@
 use crate::configuration;
 use configuration::{Limit, Ratelimit, TimeUnit};
 use governor::{DefaultKeyedRateLimiter, InsufficientCapacity, Quota};
-use log::debug;
+use log::trace;
 use std::fmt::Display;
 use std::num::{NonZero, NonZeroU32};
 use std::sync::RwLock;
@@ -99,9 +99,11 @@ impl RatelimitMap {
         selector: Header,
         tokens_used: NonZeroU32,
     ) -> Result<(), Error> {
-        debug!(
+        trace!(
             "Checking limit for provider={}, with selector={:?}, consuming tokens={:?}",
-            provider, selector, tokens_used
+            provider,
+            selector,
+            tokens_used
         );
 
         let provider_limits = match self.datastore.get(&provider) {

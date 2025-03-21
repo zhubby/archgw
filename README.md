@@ -249,7 +249,7 @@ client = OpenAI(
 
 response = client.chat.completions.create(
     # we select model from arch_config file
-    model="--",
+    model="None",
     messages=[{"role": "user", "content": "What is the capital of France?"}],
 )
 

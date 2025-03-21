@@ -30,7 +30,7 @@ fn request_headers_expectations(module: &mut Tester, http_context: i32) {
             Some("x-arch-llm-provider-hint"),
         )
         .returning(None)
-        .expect_log(Some(LogLevel::Debug), Some("request received: llm provider hint: default, selected llm: open-ai-gpt-4, model: gpt-4"))
+        .expect_log(Some(LogLevel::Trace), Some("request received: llm provider hint: default, selected llm: open-ai-gpt-4, model: gpt-4"))
         .expect_add_header_map_value(
             Some(MapType::HttpRequestHeaders),
             Some("x-arch-llm-provider"),
@@ -225,12 +225,13 @@ fn llm_gateway_successful_request_to_open_ai_chat_completions() {
         )
         .expect_get_buffer_bytes(Some(BufferType::HttpRequestBody))
         .returning(Some(chat_completions_request_body))
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_log(Some(LogLevel::Trace), None)
         .expect_log(Some(LogLevel::Trace), None)
         .expect_log(Some(LogLevel::Trace), None)
         .expect_metric_record("input_sequence_length", 21)
-        .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Trace), None)
         .expect_set_buffer_bytes(Some(BufferType::HttpRequestBody), None)
         .execute_and_expect(ReturnType::Action(Action::Continue))
         .unwrap();
@@ -287,7 +288,7 @@ fn llm_gateway_bad_request_to_open_ai_chat_completions() {
         )
         .expect_get_buffer_bytes(Some(BufferType::HttpRequestBody))
         .returning(Some(incomplete_chat_completions_request_body))
-        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_send_local_response(
             Some(StatusCode::BAD_REQUEST.as_u16().into()),
             None,
@@ -296,9 +297,10 @@ fn llm_gateway_bad_request_to_open_ai_chat_completions() {
         )
         .expect_log(Some(LogLevel::Trace), None)
         .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Trace), None)
         .expect_metric_record("input_sequence_length", 14)
-        .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Trace), None)
         .execute_and_expect(ReturnType::Action(Action::Continue))
         .unwrap();
 }
@@ -351,13 +353,14 @@ fn llm_gateway_request_ratelimited() {
         .expect_get_buffer_bytes(Some(BufferType::HttpRequestBody))
         .returning(Some(chat_completions_request_body))
         // The actual call is not important in this test, we just need to grab the token_id
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Trace), None)
         .expect_log(Some(LogLevel::Trace), None)
         .expect_log(Some(LogLevel::Trace), None)
         .expect_metric_record("input_sequence_length", 107)
         .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Debug), Some("server error occurred: exceeded limit provider=gpt-4, selector=Header { key: \"selector-key\", value: \"selector-value\" }, tokens_used=107"))
         .expect_send_local_response(
             Some(StatusCode::TOO_MANY_REQUESTS.as_u16().into()),
             None,
@@ -417,12 +420,196 @@ fn llm_gateway_request_not_ratelimited() {
         .expect_get_buffer_bytes(Some(BufferType::HttpRequestBody))
         .returning(Some(chat_completions_request_body))
         // The actual call is not important in this test, we just need to grab the token_id
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Trace), None)
         .expect_log(Some(LogLevel::Trace), None)
         .expect_log(Some(LogLevel::Trace), None)
         .expect_metric_record("input_sequence_length", 29)
         .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Trace), None)
+        .expect_set_buffer_bytes(Some(BufferType::HttpRequestBody), None)
+        .execute_and_expect(ReturnType::Action(Action::Continue))
+        .unwrap();
+}
+
+#[test]
+#[serial]
+fn llm_gateway_override_model_name() {
+    let args = tester::MockSettings {
+        wasm_path: wasm_module(),
+        quiet: false,
+        allow_unexpected: false,
+    };
+    let mut module = tester::mock(args).unwrap();
+
+    module
+        .call_start()
+        .execute_and_expect(ReturnType::None)
+        .unwrap();
+
+    // Setup Filter
+    let filter_context = setup_filter(&mut module, default_config());
+
+    // Setup HTTP Stream
+    let http_context = 2;
+
+    normal_flow(&mut module, filter_context, http_context);
+
+    // give shorter body to avoid rate limiting
+    let chat_completions_request_body = "\
+{\
+    \"model\": \"o1-mini\",\
+    \"messages\": [\
+    {\
+        \"role\": \"system\",\
+        \"content\": \"You are a poetic assistant, skilled in explaining complex programming concepts with creative flair.\"\
+    },\
+    {\
+        \"role\": \"user\",\
+        \"content\": \"Compose a poem that explains the concept of recursion in programming.\"\
+    }\
+    ]
+}";
+
+    module
+        .call_proxy_on_request_body(
+            http_context,
+            chat_completions_request_body.len() as i32,
+            true,
+        )
+        .expect_get_buffer_bytes(Some(BufferType::HttpRequestBody))
+        .returning(Some(chat_completions_request_body))
+        // The actual call is not important in this test, we just need to grab the token_id
+        .expect_log(Some(LogLevel::Debug), Some("provider: \"open-ai-gpt-4\", model requested: o1-mini, model selected: Some(\"gpt-4\")"))
+        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Trace), None)
+        .expect_metric_record("input_sequence_length", 29)
+        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Trace), None)
+        .expect_set_buffer_bytes(Some(BufferType::HttpRequestBody), None)
+        .execute_and_expect(ReturnType::Action(Action::Continue))
+        .unwrap();
+}
+
+#[test]
+#[serial]
+fn llm_gateway_override_use_default_model() {
+    let args = tester::MockSettings {
+        wasm_path: wasm_module(),
+        quiet: false,
+        allow_unexpected: false,
+    };
+    let mut module = tester::mock(args).unwrap();
+
+    module
+        .call_start()
+        .execute_and_expect(ReturnType::None)
+        .unwrap();
+
+    // Setup Filter
+    let filter_context = setup_filter(&mut module, default_config());
+
+    // Setup HTTP Stream
+    let http_context = 2;
+
+    normal_flow(&mut module, filter_context, http_context);
+
+    // give shorter body to avoid rate limiting
+    let chat_completions_request_body = "\
+{\
+    \"messages\": [\
+    {\
+        \"role\": \"system\",\
+        \"content\": \"You are a poetic assistant, skilled in explaining complex programming concepts with creative flair.\"\
+    },\
+    {\
+        \"role\": \"user\",\
+        \"content\": \"Compose a poem that explains the concept of recursion in programming.\"\
+    }\
+    ]
+}";
+
+    module
+        .call_proxy_on_request_body(
+            http_context,
+            chat_completions_request_body.len() as i32,
+            true,
+        )
+        .expect_get_buffer_bytes(Some(BufferType::HttpRequestBody))
+        .returning(Some(chat_completions_request_body))
+        // The actual call is not important in this test, we just need to grab the token_id
+        .expect_log(
+            Some(LogLevel::Debug),
+            Some("provider: \"open-ai-gpt-4\", model requested: , model selected: Some(\"gpt-4\")"),
+        )
+        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Trace), None)
+        .expect_metric_record("input_sequence_length", 29)
+        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Trace), None)
+        .expect_set_buffer_bytes(Some(BufferType::HttpRequestBody), None)
+        .execute_and_expect(ReturnType::Action(Action::Continue))
+        .unwrap();
+}
+
+#[test]
+#[serial]
+fn llm_gateway_override_use_model_name_none() {
+    let args = tester::MockSettings {
+        wasm_path: wasm_module(),
+        quiet: false,
+        allow_unexpected: false,
+    };
+    let mut module = tester::mock(args).unwrap();
+
+    module
+        .call_start()
+        .execute_and_expect(ReturnType::None)
+        .unwrap();
+
+    // Setup Filter
+    let filter_context = setup_filter(&mut module, default_config());
+
+    // Setup HTTP Stream
+    let http_context = 2;
+
+    normal_flow(&mut module, filter_context, http_context);
+
+    // give shorter body to avoid rate limiting
+    let chat_completions_request_body = "\
+{\
+    \"model\": \"none\",\
+    \"messages\": [\
+    {\
+        \"role\": \"system\",\
+        \"content\": \"You are a poetic assistant, skilled in explaining complex programming concepts with creative flair.\"\
+    },\
+    {\
+        \"role\": \"user\",\
+        \"content\": \"Compose a poem that explains the concept of recursion in programming.\"\
+    }\
+    ]
+}";
+
+    module
+        .call_proxy_on_request_body(
+            http_context,
+            chat_completions_request_body.len() as i32,
+            true,
+        )
+        .expect_get_buffer_bytes(Some(BufferType::HttpRequestBody))
+        .returning(Some(chat_completions_request_body))
+        // The actual call is not important in this test, we just need to grab the token_id
+        .expect_log(Some(LogLevel::Debug), Some("provider: \"open-ai-gpt-4\", model requested: none, model selected: Some(\"gpt-4\")"))
+        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Trace), None)
+        .expect_metric_record("input_sequence_length", 29)
+        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Trace), None)
         .expect_set_buffer_bytes(Some(BufferType::HttpRequestBody), None)
         .execute_and_expect(ReturnType::Action(Action::Continue))
         .unwrap();

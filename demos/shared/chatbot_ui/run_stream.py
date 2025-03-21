@@ -54,13 +54,13 @@ def chat(
         if model_selector and model_selector != "":
             headers["x-arch-llm-provider-hint"] = model_selector
         client = OpenAI(
-            api_key="--",
+            api_key="None",
             base_url=CHAT_COMPLETION_ENDPOINT,
             default_headers=headers,
         )
         response = client.chat.completions.create(
             # we select model from arch_config file
-            model="--",
+            model="None",
             messages=history,
             temperature=1.0,
             stream=True,

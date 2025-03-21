@@ -45,7 +45,8 @@ impl HttpContext for StreamContext {
                         warn!("Need single endpoint when use_agent_orchestrator is set");
                         self.send_server_error(
                             ServerError::LogicError(
-                                "Need single endpoint when use_agent_orchestrator is set".to_string(),
+                                "Need single endpoint when use_agent_orchestrator is set"
+                                    .to_string(),
                             ),
                             None,
                         );
@@ -190,7 +191,7 @@ impl HttpContext for StreamContext {
             messages: deserialized_body.messages.clone(),
             metadata,
             stream: deserialized_body.stream,
-            model: "--".to_string(),
+            model: deserialized_body.model.clone(),
             stream_options: deserialized_body.stream_options.clone(),
             tools: Some(tool_calls),
         };

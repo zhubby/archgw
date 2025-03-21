@@ -427,7 +427,6 @@ impl StreamContext {
             headers.insert(key.as_str(), value.as_str());
         }
 
-
         let call_args = CallArgs::new(
             ARCH_INTERNAL_CLUSTER_NAME,
             &path,
@@ -499,10 +498,7 @@ impl StreamContext {
             }
         };
 
-        if !prompt_target
-            .auto_llm_dispatch_on_response
-            .unwrap_or(true)
-        {
+        if !prompt_target.auto_llm_dispatch_on_response.unwrap_or(true) {
             let tool_call_response = self.tool_call_response.as_ref().unwrap().clone();
 
             let direct_response_str = if self.streaming_response {
@@ -655,10 +651,7 @@ impl StreamContext {
             .clone();
 
         // check if the default target should be dispatched to the LLM provider
-        if !prompt_target
-            .auto_llm_dispatch_on_response
-            .unwrap_or(true)
-        {
+        if !prompt_target.auto_llm_dispatch_on_response.unwrap_or(true) {
             let default_target_response_str = if self.streaming_response {
                 let chat_completion_response =
                     match serde_json::from_slice::<ChatCompletionsResponse>(&body) {
