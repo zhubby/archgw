@@ -19,7 +19,7 @@ source venv/bin/activate
 
 ### Step 3: Run the build script
 ```bash
-pip install archgw==0.2.3
+pip install archgw==0.2.4
 ```
 
 ## Uninstall Instructions: archgw CLI
