@@ -214,10 +214,17 @@ impl HttpContext for StreamContext {
             }));
         } else {
             self.select_llm_provider();
-            self.add_http_request_header(
-                ARCH_ROUTING_HEADER,
-                &self.llm_provider().provider_interface.to_string(),
-            );
+            if self.llm_provider().endpoint.is_some() {
+                self.add_http_request_header(
+                    ARCH_ROUTING_HEADER,
+                    &self.llm_provider().name.to_string(),
+                );
+            } else {
+                self.add_http_request_header(
+                    ARCH_ROUTING_HEADER,
+                    &self.llm_provider().provider_interface.to_string(),
+                );
+            }
             if let Err(error) = self.modify_auth_headers() {
                 // ensure that the provider has an endpoint if the access key is missing else return a bad request
                 if self.llm_provider.as_ref().unwrap().endpoint.is_none() && !use_agent_orchestrator
