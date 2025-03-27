@@ -15,7 +15,7 @@ use common::http::{CallArgs, Client};
 use common::stats::Gauge;
 use derivative::Derivative;
 use http::StatusCode;
-use log::{debug, trace, warn};
+use log::{debug, info, warn};
 use proxy_wasm::traits::*;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -128,8 +128,8 @@ impl StreamContext {
         mut callout_context: StreamCallContext,
     ) {
         let body_str = String::from_utf8(body).unwrap();
-        debug!("model server response received");
-        trace!("response body: {}", body_str);
+        info!("on_http_call_response: model server response received");
+        debug!("response body: {}", body_str);
 
         let model_server_response: ChatCompletionsResponse = match serde_json::from_str(&body_str) {
             Ok(arch_fc_response) => arch_fc_response,
@@ -150,14 +150,14 @@ impl StreamContext {
             .is_some();
 
         if !intent_matched {
-            debug!("intent not matched");
+            info!("intent not matched");
             // check if we have a default prompt target
             if let Some(default_prompt_target) = self
                 .prompt_targets
                 .values()
                 .find(|pt| pt.default.unwrap_or(false))
             {
-                debug!("default prompt target found, forwarding request to default prompt target");
+                info!("default prompt target found, forwarding request to default prompt target");
                 let endpoint = default_prompt_target.endpoint.clone().unwrap();
                 let upstream_path: String = endpoint.path.unwrap_or(String::from("/"));
 
@@ -204,7 +204,7 @@ impl StreamContext {
                 }
                 return;
             } else {
-                debug!("no default prompt target found, forwarding request to upstream llm");
+                info!("no default prompt target found, forwarding request to upstream llm");
                 let mut messages = Vec::new();
                 // add system prompt
                 match self.system_prompt.as_ref() {
@@ -242,7 +242,7 @@ impl StreamContext {
 
                 let chat_completion_request_json =
                     serde_json::to_string(&chat_completion_request).unwrap();
-                debug!(
+                info!(
                     "archgw => upstream llm request: {}",
                     chat_completion_request_json
                 );
@@ -353,7 +353,7 @@ impl StreamContext {
                 };
 
                 let body_str = serde_json::to_string(&chat_completion_request).unwrap();
-                debug!("sending request to llm agent: {}", body_str);
+                info!("sending request to llm agent: {}", body_str);
                 self.set_http_request_body(0, self.request_body_size, body_str.as_bytes());
                 self.resume_http_request();
                 return;
@@ -396,7 +396,7 @@ impl StreamContext {
             }
         };
 
-        debug!("api call body {:?}", api_call_body);
+        debug!("on_http_call_response: api call body {:?}", api_call_body);
 
         let timeout_str = API_REQUEST_TIMEOUT_MS.to_string();
 
@@ -436,8 +436,8 @@ impl StreamContext {
             Duration::from_secs(5),
         );
 
-        debug!(
-            "dispatching api call to developer endpoint: {}, path: {}, method: {}",
+        info!(
+            "on_http_call_response: dispatching api call to developer endpoint: {}, path: {}, method: {}",
             endpoint_details.name, path, http_method_str
         );
 
@@ -454,8 +454,8 @@ impl StreamContext {
         let http_status = self
             .get_http_call_response_header(":status")
             .unwrap_or(StatusCode::OK.as_str().to_string());
-        debug!(
-            "developer api call response received: status code: {}",
+        info!(
+            "on_http_call_response: developer api call response received: status code: {}",
             http_status
         );
         let prompt_target = self
@@ -479,7 +479,7 @@ impl StreamContext {
             );
         }
         self.tool_call_response = Some(String::from_utf8(body).unwrap());
-        trace!(
+        debug!(
             "response body: {}",
             self.tool_call_response.as_ref().unwrap()
         );
@@ -561,8 +561,8 @@ impl StreamContext {
                 return self.send_server_error(ServerError::Serialization(e), None);
             }
         };
-        debug!("sending request to upstream llm");
-        trace!("request body: {}", llm_request_str);
+        info!("on_http_call_response: sending request to upstream llm");
+        debug!("request body: {}", llm_request_str);
 
         self.start_upstream_llm_request_time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
@@ -755,7 +755,7 @@ impl StreamContext {
         };
 
         let json_resp = serde_json::to_string(&chat_completion_request).unwrap();
-        debug!("archgw => (default target) llm request: {}", json_resp);
+        info!("archgw => (default target) llm request: {}", json_resp);
         self.set_http_request_body(0, self.request_body_size, json_resp.as_bytes());
         self.resume_http_request();
     }

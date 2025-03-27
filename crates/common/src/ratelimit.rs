@@ -1,7 +1,7 @@
 use crate::configuration;
 use configuration::{Limit, Ratelimit, TimeUnit};
 use governor::{DefaultKeyedRateLimiter, InsufficientCapacity, Quota};
-use log::trace;
+use log::debug;
 use std::fmt::Display;
 use std::num::{NonZero, NonZeroU32};
 use std::sync::RwLock;
@@ -99,7 +99,7 @@ impl RatelimitMap {
         selector: Header,
         tokens_used: NonZeroU32,
     ) -> Result<(), Error> {
-        trace!(
+        debug!(
             "Checking limit for provider={}, with selector={:?}, consuming tokens={:?}",
             provider,
             selector,

@@ -3,7 +3,7 @@ use crate::{
     stats::{Gauge, IncrementingMetric},
 };
 use derivative::Derivative;
-use log::trace;
+use log::debug;
 use proxy_wasm::traits::Context;
 use serde::Serialize;
 use std::{cell::RefCell, collections::HashMap, fmt::Debug, time::Duration};
@@ -48,7 +48,7 @@ pub trait Client: Context {
         call_args: CallArgs,
         call_context: Self::CallContext,
     ) -> Result<u32, ClientError> {
-        trace!(
+        debug!(
             "dispatching http call with args={:?} context={:?}",
             call_args,
             call_context

@@ -30,7 +30,7 @@ fn request_headers_expectations(module: &mut Tester, http_context: i32) {
             Some("x-arch-llm-provider-hint"),
         )
         .returning(None)
-        .expect_log(Some(LogLevel::Trace), Some("request received: llm provider hint: default, selected llm: open-ai-gpt-4, model: gpt-4"))
+        .expect_log(Some(LogLevel::Debug), Some("request received: llm provider hint: default, selected llm: open-ai-gpt-4, model: gpt-4"))
         .expect_add_header_map_value(
             Some(MapType::HttpRequestHeaders),
             Some("x-arch-llm-provider"),
@@ -223,15 +223,16 @@ fn llm_gateway_successful_request_to_open_ai_chat_completions() {
             chat_completions_request_body.len() as i32,
             true,
         )
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_get_buffer_bytes(Some(BufferType::HttpRequestBody))
         .returning(Some(chat_completions_request_body))
+        .expect_log(Some(LogLevel::Info), None)
         .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_metric_record("input_sequence_length", 21)
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_set_buffer_bytes(Some(BufferType::HttpRequestBody), None)
         .execute_and_expect(ReturnType::Action(Action::Continue))
         .unwrap();
@@ -289,18 +290,19 @@ fn llm_gateway_bad_request_to_open_ai_chat_completions() {
         .expect_get_buffer_bytes(Some(BufferType::HttpRequestBody))
         .returning(Some(incomplete_chat_completions_request_body))
         .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Info), Some("on_http_request_body: provider: open-ai-gpt-4, model requested: , model selected: gpt-4"))
         .expect_send_local_response(
             Some(StatusCode::BAD_REQUEST.as_u16().into()),
             None,
             None,
             None,
         )
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_metric_record("input_sequence_length", 14)
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Debug), None)
         .execute_and_expect(ReturnType::Action(Action::Continue))
         .unwrap();
 }
@@ -350,17 +352,18 @@ fn llm_gateway_request_ratelimited() {
             chat_completions_request_body.len() as i32,
             true,
         )
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_get_buffer_bytes(Some(BufferType::HttpRequestBody))
         .returning(Some(chat_completions_request_body))
         // The actual call is not important in this test, we just need to grab the token_id
+        .expect_log(Some(LogLevel::Info), None)
         .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_metric_record("input_sequence_length", 107)
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Debug), Some("server error occurred: exceeded limit provider=gpt-4, selector=Header { key: \"selector-key\", value: \"selector-value\" }, tokens_used=107"))
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Warn), Some("server error occurred: exceeded limit provider=gpt-4, selector=Header { key: \"selector-key\", value: \"selector-value\" }, tokens_used=107"))
         .expect_send_local_response(
             Some(StatusCode::TOO_MANY_REQUESTS.as_u16().into()),
             None,
@@ -417,16 +420,17 @@ fn llm_gateway_request_not_ratelimited() {
             chat_completions_request_body.len() as i32,
             true,
         )
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_get_buffer_bytes(Some(BufferType::HttpRequestBody))
         .returning(Some(chat_completions_request_body))
         // The actual call is not important in this test, we just need to grab the token_id
+        .expect_log(Some(LogLevel::Info), None)
         .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_metric_record("input_sequence_length", 29)
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_set_buffer_bytes(Some(BufferType::HttpRequestBody), None)
         .execute_and_expect(ReturnType::Action(Action::Continue))
         .unwrap();
@@ -480,14 +484,15 @@ fn llm_gateway_override_model_name() {
         .expect_get_buffer_bytes(Some(BufferType::HttpRequestBody))
         .returning(Some(chat_completions_request_body))
         // The actual call is not important in this test, we just need to grab the token_id
-        .expect_log(Some(LogLevel::Debug), Some("provider: \"open-ai-gpt-4\", model requested: o1-mini, model selected: Some(\"gpt-4\")"))
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Info), Some("on_http_request_body: provider: open-ai-gpt-4, model requested: o1-mini, model selected: gpt-4"))
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_metric_record("input_sequence_length", 29)
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_set_buffer_bytes(Some(BufferType::HttpRequestBody), None)
         .execute_and_expect(ReturnType::Action(Action::Continue))
         .unwrap();
@@ -537,19 +542,20 @@ fn llm_gateway_override_use_default_model() {
             chat_completions_request_body.len() as i32,
             true,
         )
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_get_buffer_bytes(Some(BufferType::HttpRequestBody))
         .returning(Some(chat_completions_request_body))
         // The actual call is not important in this test, we just need to grab the token_id
         .expect_log(
-            Some(LogLevel::Debug),
-            Some("provider: \"open-ai-gpt-4\", model requested: , model selected: Some(\"gpt-4\")"),
+            Some(LogLevel::Info),
+            Some("on_http_request_body: provider: open-ai-gpt-4, model requested: , model selected: gpt-4"),
         )
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_metric_record("input_sequence_length", 29)
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_set_buffer_bytes(Some(BufferType::HttpRequestBody), None)
         .execute_and_expect(ReturnType::Action(Action::Continue))
         .unwrap();
@@ -603,13 +609,14 @@ fn llm_gateway_override_use_model_name_none() {
         .expect_get_buffer_bytes(Some(BufferType::HttpRequestBody))
         .returning(Some(chat_completions_request_body))
         // The actual call is not important in this test, we just need to grab the token_id
-        .expect_log(Some(LogLevel::Debug), Some("provider: \"open-ai-gpt-4\", model requested: none, model selected: Some(\"gpt-4\")"))
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Info), Some("on_http_request_body: provider: open-ai-gpt-4, model requested: none, model selected: gpt-4"))
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_metric_record("input_sequence_length", 29)
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_set_buffer_bytes(Some(BufferType::HttpRequestBody), None)
         .execute_and_expect(ReturnType::Action(Action::Continue))
         .unwrap();

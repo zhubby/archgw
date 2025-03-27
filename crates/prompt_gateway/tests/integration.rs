@@ -24,12 +24,12 @@ fn wasm_module() -> String {
 fn request_headers_expectations(module: &mut Tester, http_context: i32) {
     module
         .call_proxy_on_request_headers(http_context, 0, false)
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_remove_header_map_value(Some(MapType::HttpRequestHeaders), Some("content-length"))
         .expect_get_header_map_value(Some(MapType::HttpRequestHeaders), Some(":path"))
         .returning(Some("/v1/chat/completions"))
         .expect_get_header_map_pairs(Some(MapType::HttpRequestHeaders))
         .returning(None)
-        .expect_log(Some(LogLevel::Trace), None)
         .expect_get_header_map_value(Some(MapType::HttpRequestHeaders), Some("x-request-id"))
         .returning(None)
         .expect_get_header_map_value(Some(MapType::HttpRequestHeaders), Some("traceparent"))
@@ -69,10 +69,14 @@ fn normal_flow(module: &mut Tester, filter_context: i32, http_context: i32) {
             chat_completions_request_body.len() as i32,
             true,
         )
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_get_buffer_bytes(Some(BufferType::HttpRequestBody))
         .returning(Some(chat_completions_request_body))
         // The actual call is not important in this test, we just need to grab the token_id
-        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Info), None)
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_http_call(
             Some("arch_internal"),
             Some(vec![
@@ -88,10 +92,6 @@ fn normal_flow(module: &mut Tester, filter_context: i32, http_context: i32) {
             Some(5000),
         )
         .returning(Some(1))
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
         .expect_metric_increment("active_http_calls", 1)
         .execute_and_expect(ReturnType::Action(Action::Pause))
         .unwrap();
@@ -233,13 +233,13 @@ fn prompt_gateway_successful_request_to_open_ai_chat_completions() {
             chat_completions_request_body.len() as i32,
             true,
         )
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_get_buffer_bytes(Some(BufferType::HttpRequestBody))
         .returning(Some(chat_completions_request_body))
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
         .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Info), None)
+        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_http_call(Some("arch_internal"), None, None, None, None)
         .returning(Some(4))
         .expect_metric_increment("active_http_calls", 1)
@@ -296,16 +296,16 @@ fn prompt_gateway_bad_request_to_open_ai_chat_completions() {
             incomplete_chat_completions_request_body.len() as i32,
             true,
         )
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_get_buffer_bytes(Some(BufferType::HttpRequestBody))
         .returning(Some(incomplete_chat_completions_request_body))
-        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Debug), None)
         .expect_send_local_response(
             Some(StatusCode::BAD_REQUEST.as_u16().into()),
             None,
             None,
             None,
         )
-        .expect_log(Some(LogLevel::Trace), None)
         .execute_and_expect(ReturnType::Action(Action::Pause))
         .unwrap();
 }
@@ -378,11 +378,11 @@ fn prompt_gateway_request_to_llm_gateway() {
         .expect_get_buffer_bytes(Some(BufferType::HttpCallResponseBody))
         .returning(Some(&arch_fc_resp_str))
         .expect_log(Some(LogLevel::Warn), None)
+        .expect_log(Some(LogLevel::Info), None)
         .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Trace), None)
         .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Info), None)
         .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Trace), None)
         .expect_http_call(
             Some("arch_internal"),
             Some(vec![
@@ -410,14 +410,14 @@ fn prompt_gateway_request_to_llm_gateway() {
         .expect_metric_increment("active_http_calls", -1)
         .expect_get_buffer_bytes(Some(BufferType::HttpCallResponseBody))
         .returning(Some(&body_text))
+        .expect_log(Some(LogLevel::Info), None)
         .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Trace), None)
+        .expect_log(Some(LogLevel::Info), None)
         .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Trace), None)
         .expect_get_header_map_value(Some(MapType::HttpCallResponseHeaders), Some(":status"))
         .returning(Some("200"))
         .expect_set_buffer_bytes(Some(BufferType::HttpRequestBody), None)
+        .expect_log(Some(LogLevel::Debug), None)
         .execute_and_expect(ReturnType::None)
         .unwrap();
 
@@ -449,11 +449,11 @@ fn prompt_gateway_request_to_llm_gateway() {
         )
         .expect_get_buffer_bytes(Some(BufferType::HttpResponseBody))
         .returning(Some(chat_completion_response_str.as_str()))
-        .expect_log(Some(LogLevel::Trace), None)
         .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Info), None)
         .expect_set_buffer_bytes(Some(BufferType::HttpResponseBody), None)
+        .expect_log(Some(LogLevel::Info), None)
         .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Trace), None)
         .execute_and_expect(ReturnType::Action(Action::Continue))
         .unwrap();
 }
@@ -521,15 +521,15 @@ fn prompt_gateway_request_no_intent_match() {
         .expect_get_buffer_bytes(Some(BufferType::HttpCallResponseBody))
         .returning(Some(&arch_fc_resp_str))
         .expect_log(Some(LogLevel::Warn), None)
+        .expect_log(Some(LogLevel::Info), None)
         .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Debug), Some("intent not matched"))
+        .expect_log(Some(LogLevel::Info), Some("intent not matched"))
         .expect_log(
-            Some(LogLevel::Debug),
+            Some(LogLevel::Info),
             Some("no default prompt target found, forwarding request to upstream llm"),
         )
-        .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Info), None)
+        .expect_log(Some(LogLevel::Info), None)
         .expect_set_buffer_bytes(Some(BufferType::HttpRequestBody), None)
         .execute_and_expect(ReturnType::None)
         .unwrap();
@@ -677,15 +677,15 @@ fn prompt_gateway_request_no_intent_match_default_target() {
         .expect_get_buffer_bytes(Some(BufferType::HttpCallResponseBody))
         .returning(Some(&arch_fc_resp_str))
         .expect_log(Some(LogLevel::Warn), None)
+        .expect_log(Some(LogLevel::Info), None)
         .expect_log(Some(LogLevel::Debug), None)
-        .expect_log(Some(LogLevel::Trace), None)
-        .expect_log(Some(LogLevel::Debug), Some("intent not matched"))
+        .expect_log(Some(LogLevel::Info), Some("intent not matched"))
         .expect_log(
-            Some(LogLevel::Debug),
+            Some(LogLevel::Info),
             Some("default prompt target found, forwarding request to default prompt target"),
         )
-        .expect_log(Some(LogLevel::Trace), None)
         .expect_log(Some(LogLevel::Debug), None)
+        .expect_log(Some(LogLevel::Info), None)
         .expect_http_call(
             Some("arch_internal"),
             Some(vec![

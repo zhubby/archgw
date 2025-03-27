@@ -14,7 +14,7 @@ use common::{
     pii::obfuscate_auth_header,
 };
 use http::StatusCode;
-use log::{debug, trace, warn};
+use log::{debug, info, warn};
 use proxy_wasm::{traits::HttpContext, types::Action};
 use serde_json::Value;
 use std::{
@@ -39,7 +39,7 @@ impl HttpContext for StreamContext {
                 if let Some(endpoints) = self.endpoints.as_ref() {
                     if endpoints.len() == 1 {
                         let (name, _) = endpoints.iter().next().unwrap();
-                        debug!("Setting ARCH_PROVIDER_HINT_HEADER to {}", name);
+                        info!("Setting ARCH_PROVIDER_HINT_HEADER to {}", name);
                         self.set_http_request_header(ARCH_ROUTING_HEADER, Some(name));
                     } else {
                         warn!("Need single endpoint when use_agent_orchestrator is set");
@@ -63,7 +63,7 @@ impl HttpContext for StreamContext {
 
         self.is_chat_completions_request = request_path == CHAT_COMPLETIONS_PATH;
 
-        trace!(
+        debug!(
             "on_http_request_headers S[{}] req_headers={:?}",
             self.context_id,
             obfuscate_auth_header(&mut self.get_http_request_headers())
@@ -89,10 +89,9 @@ impl HttpContext for StreamContext {
 
         self.request_body_size = body_size;
 
-        trace!(
+        debug!(
             "on_http_request_body S[{}] body_size={}",
-            self.context_id,
-            body_size
+            self.context_id, body_size
         );
 
         let body_bytes = match self.get_http_request_body(0, body_size) {
@@ -109,7 +108,7 @@ impl HttpContext for StreamContext {
             }
         };
 
-        trace!("request body: {}", String::from_utf8_lossy(&body_bytes));
+        debug!("request body: {}", String::from_utf8_lossy(&body_bytes));
 
         // Deserialize body into spec.
         // Currently OpenAI API.
@@ -206,8 +205,8 @@ impl HttpContext for StreamContext {
             }
         };
 
-        debug!("sending request to model server");
-        trace!("request body: {}", json_data);
+        info!("on_http_request_body: sending request to model server");
+        debug!("request body: {}", json_data);
 
         let timeout_str = MODEL_SERVER_REQUEST_TIMEOUT_MS.to_string();
 
@@ -248,7 +247,7 @@ impl HttpContext for StreamContext {
         };
 
         if let Err(e) = self.http_call(call_args, call_context) {
-            debug!("http_call failed: {:?}", e);
+            warn!("http_call failed: {:?}", e);
             self.send_server_error(ServerError::HttpDispatch(e), None);
         }
 
@@ -256,7 +255,7 @@ impl HttpContext for StreamContext {
     }
 
     fn on_http_response_headers(&mut self, _num_headers: usize, _end_of_stream: bool) -> Action {
-        trace!(
+        debug!(
             "on_http_response_headers recv [S={}] headers={:?}",
             self.context_id,
             self.get_http_response_headers()
@@ -268,15 +267,13 @@ impl HttpContext for StreamContext {
     }
 
     fn on_http_response_body(&mut self, body_size: usize, end_of_stream: bool) -> Action {
-        trace!(
+        debug!(
             "on_http_response_body: recv [S={}] bytes={} end_stream={}",
-            self.context_id,
-            body_size,
-            end_of_stream
+            self.context_id, body_size, end_of_stream
         );
 
         if !self.is_chat_completions_request {
-            debug!("non-gpt request");
+            info!("non-gpt request");
             return Action::Continue;
         }
 
@@ -315,7 +312,7 @@ impl HttpContext for StreamContext {
 
             streaming_chunk
         } else {
-            debug!("non streaming response bytes read: 0:{}", body_size);
+            info!("non streaming response bytes read: 0:{}", body_size);
             match self.get_http_response_body(0, body_size) {
                 Some(body) => body,
                 None => {
@@ -328,13 +325,13 @@ impl HttpContext for StreamContext {
         let body_utf8 = match String::from_utf8(body) {
             Ok(body_utf8) => body_utf8,
             Err(e) => {
-                debug!("could not convert to utf8: {}", e);
+                info!("could not convert to utf8: {}", e);
                 return Action::Continue;
             }
         };
 
         if self.streaming_response {
-            trace!("streaming response");
+            debug!("streaming response");
 
             if self.tool_calls.is_some() && !self.tool_calls.as_ref().unwrap().is_empty() {
                 let chunks = vec![
@@ -396,13 +393,13 @@ impl HttpContext for StreamContext {
                         serde_json::Value::String(arch_state_str),
                     );
                     let data_serialized = serde_json::to_string(&data).unwrap();
-                    debug!("archgw <= developer: {}", data_serialized);
+                    info!("archgw <= developer: {}", data_serialized);
                     self.set_http_response_body(0, body_size, data_serialized.as_bytes());
                 };
             }
         }
 
-        trace!("recv [S={}] end_stream={}", self.context_id, end_of_stream);
+        debug!("recv [S={}] end_stream={}", self.context_id, end_of_stream);
 
         Action::Continue
     }

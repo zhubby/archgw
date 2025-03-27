@@ -309,6 +309,33 @@ Arch is designed to support best-in class observability by supporting open stand
 
 ![alt text](docs/source/_static/img/tracing.png)
 
+## Debugging
+
+When debugging issues / errors application logs and access logs provide key information to give you more context on whats going on with the system. Arch gateway runs in info log level and following is a typical output you could see in a typical interaction between developer and arch gateway,
+
+```
+$ archgw up --service archgw --foreground
+...
+[2025-03-26 18:32:01.350][26][info] prompt_gateway: on_http_request_body: sending request to model server
+[2025-03-26 18:32:01.851][26][info] prompt_gateway: on_http_call_response: model server response received
+[2025-03-26 18:32:01.852][26][info] prompt_gateway: on_http_call_response: dispatching api call to developer endpoint: weather_forecast_service, path: /weather, method: POST
+[2025-03-26 18:32:01.882][26][info] prompt_gateway: on_http_call_response: developer api call response received: status code: 200
+[2025-03-26 18:32:01.882][26][info] prompt_gateway: on_http_call_response: sending request to upstream llm
+[2025-03-26 18:32:01.883][26][info] llm_gateway: on_http_request_body: provider: gpt-4o-mini, model requested: None, model selected: gpt-4o-mini
+[2025-03-26 18:32:02.818][26][info] llm_gateway: on_http_response_body: time to first token: 1468ms
+[2025-03-26 18:32:04.532][26][info] llm_gateway: on_http_response_body: request latency: 3183ms
+...
+```
+
+Log level can be changed to debug to get more details. To enable debug logs edit (Dockerfile)[arch/Dockerfile], change the log level `--component-log-level wasm:info` to `--component-log-level wasm:debug`. And after that you need to rebuild docker image and restart the arch gateway using following set of commands,
+
+```
+# make sure you are at the root of the repo
+$ archgw build
+# go to your service that has arch_config.yaml file and issue following command,
+$ archgw up --service archgw --foreground
+```
+
 ## Contribution
 We would love feedback on our [Roadmap](https://github.com/orgs/katanemo/projects/1) and we welcome contributions to **Arch**!
 Whether you're fixing bugs, adding new features, improving documentation, or creating tutorials, your help is much appreciated.

@@ -1,14 +1,14 @@
-use log::trace;
+use log::{debug};
 
 #[allow(dead_code)]
 pub fn token_count(model_name: &str, text: &str) -> Result<usize, String> {
-    trace!("getting token count model={}", model_name);
+    debug!("getting token count model={}", model_name);
     //HACK: add support for tokenizing mistral and other models
     //filed issue https://github.com/katanemo/arch/issues/222
 
     let updated_model = match model_name.starts_with("gpt") {
         false => {
-            trace!(
+            debug!(
                 "tiktoken_rs: unsupported model: {}, using gpt-4 to compute token count",
                 model_name
             );
