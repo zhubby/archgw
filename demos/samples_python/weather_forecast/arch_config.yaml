@@ -17,16 +17,12 @@ overrides:
   prompt_target_intent_matching_threshold: 0.6
 
 llm_providers:
-  - name: gpt-4o-mini
-    access_key: $OPENAI_API_KEY
+  - name: groq
+    access_key: $GROQ_API_KEY
     provider_interface: openai
-    model: gpt-4o-mini
+    model: llama-3.2-3b-preview
+    base_url: https://api.groq.com
     default: true
-
-  - name: gpt-3.5-turbo-0125
-    access_key: $OPENAI_API_KEY
-    provider_interface: openai
-    model: gpt-3.5-turbo-0125
 
   - name: gpt-4o
     access_key: $OPENAI_API_KEY

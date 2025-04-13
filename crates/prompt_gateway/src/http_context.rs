@@ -61,7 +61,7 @@ impl HttpContext for StreamContext {
             return Action::Continue;
         }
 
-        self.is_chat_completions_request = request_path == CHAT_COMPLETIONS_PATH;
+        self.is_chat_completions_request = CHAT_COMPLETIONS_PATH.contains(&request_path.as_str());
 
         debug!(
             "on_http_request_headers S[{}] req_headers={:?}",

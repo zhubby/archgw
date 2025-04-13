@@ -89,6 +89,23 @@ impl StreamContext {
             provider_hint,
         ));
 
+        // Check if we need to modify the path based on the provider's base_url
+        let needs_openai_prefix = self
+            .llm_provider
+            .as_ref()
+            .and_then(|provider| provider.endpoint.as_ref())
+            .map(|url| url.contains("api.groq.com"))
+            .unwrap_or(false);
+
+        if needs_openai_prefix {
+            if let Some(path) = self.get_http_request_header(":path") {
+                if path.starts_with("/v1/") {
+                    let new_path = format!("/openai{}", path);
+                    self.set_http_request_header(":path", Some(new_path.as_str()));
+                }
+            }
+        }
+
         debug!(
             "request received: llm provider hint: {}, selected llm: {}, model: {}",
             self.get_http_request_header(ARCH_PROVIDER_HINT_HEADER)
@@ -237,8 +254,8 @@ impl HttpContext for StreamContext {
         self.delete_content_length_header();
         self.save_ratelimit_header();
 
-        self.is_chat_completions_request =
-            self.get_http_request_header(":path").unwrap_or_default() == CHAT_COMPLETIONS_PATH;
+        let request_path = self.get_http_request_header(":path").unwrap_or_default();
+        self.is_chat_completions_request = CHAT_COMPLETIONS_PATH.contains(&request_path.as_str());
 
         self.request_id = self.get_http_request_header(REQUEST_ID_HEADER);
         self.traceparent = self.get_http_request_header(TRACE_PARENT_HEADER);
