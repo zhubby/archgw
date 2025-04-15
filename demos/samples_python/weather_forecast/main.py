@@ -73,7 +73,7 @@ async def weather(req: WeatherRequest, res: Response):
 
 
 class DefaultTargetRequest(BaseModel):
-    messages: list
+    messages: list = []
 
 
 @app.post("/default_target")
@@ -86,12 +86,9 @@ async def default_target(req: DefaultTargetRequest, res: Response):
                     "role": "assistant",
                     "content": "I can help you with weather forecast",
                 },
-                "finish_reason": "completed",
-                "index": 0,
             }
         ],
         "model": "api_server",
-        "usage": {"completion_tokens": 0},
     }
     logger.info(f"sending response: {json.dumps(resp)}")
     return resp

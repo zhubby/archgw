@@ -68,7 +68,7 @@ Content-Type: application/json
     {
       "role": "assistant",
       "content": "It seems I'm missing some information. Could you provide the following details days ?",
-      "model": "Arch-Function-1.5b"
+      "model": "Arch-Function"
     },
     {
       "role": "user",
@@ -91,7 +91,7 @@ Content-Type: application/json
     {
       "role": "assistant",
       "content": "It seems I'm missing some information. Could you provide the following details days ?",
-      "model": "Arch-Function-1.5b"
+      "model": "Arch-Function"
     },
     {
       "role": "user",

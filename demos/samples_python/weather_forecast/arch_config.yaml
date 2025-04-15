@@ -22,12 +22,12 @@ llm_providers:
     provider_interface: openai
     model: llama-3.2-3b-preview
     base_url: https://api.groq.com
-    default: true
 
   - name: gpt-4o
     access_key: $OPENAI_API_KEY
     provider_interface: openai
     model: gpt-4o
+    default: true
 
 system_prompt: |
   You are a helpful assistant.
