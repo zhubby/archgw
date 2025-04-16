@@ -21,7 +21,7 @@ jobs:
 
       - name: build arch docker image
         run: |
-          docker build  -f arch/Dockerfile . -t katanemo/archgw
+          docker build  -f arch/Dockerfile . -t katanemo/archgw -t katanemo/archgw:0.2.7
 
       - name: install poetry
         run: |

@@ -20,6 +20,7 @@ from cli.core import (
     download_models_from_hf,
 )
 from cli.consts import (
+    ARCHGW_DOCKER_IMAGE,
     KATANEMO_DOCKERHUB_REPO,
     SERVICE_NAME_ARCHGW,
     SERVICE_NAME_MODEL_SERVER,
@@ -90,6 +91,8 @@ def build(service):
                         ARCHGW_DOCKERFILE,
                         "-t",
                         f"{KATANEMO_DOCKERHUB_REPO}:latest",
+                        "-t",
+                        f"{ARCHGW_DOCKER_IMAGE}",
                         ".",
                         "--add-host=host.docker.internal:host-gateway",
                     ],
