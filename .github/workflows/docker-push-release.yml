@@ -91,5 +91,5 @@ jobs:
         run: |
           # Combine the architecture-specific images into a single manifest
           docker buildx imagetools create -t ${{ steps.meta.outputs.tags }} \
-            ${{ env.DOCKER_IMAGE }}:arm64 \
-            ${{ env.DOCKER_IMAGE }}:amd64
+            ${{ env.DOCKER_IMAGE }}:${{ steps.meta.outputs.tags }}-arm64 \
+            ${{ env.DOCKER_IMAGE }}:${{ steps.meta.outputs.tags }}-amd64
